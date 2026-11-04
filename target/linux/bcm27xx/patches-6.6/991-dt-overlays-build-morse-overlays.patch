@@ -1,0 +1,13 @@
+--- a/arch/arm/boot/dts/overlays/Makefile
++++ b/arch/arm/boot/dts/overlays/Makefile
+@@ -186,6 +186,10 @@ dtbo-$(CONFIG_ARCH_BCM2835) += \
+ 	mipi-dbi-spi.dtbo \
+ 	mlx90640.dtbo \
++	mm_wlan.dtbo \
+ 	mmc.dtbo \
++	morse-ps.dtbo \
++	mm610x-spi.dtbo \
++	mm810x-spi.dtbo \
+ 	mz61581.dtbo \
+ 	ov2311.dtbo \
+ 	ov5647.dtbo \

@@ -1,0 +1,20 @@
+diff --git a/feeds/packages/utils/dockerd/files/dockerd.init b/feeds/packages/utils/dockerd/files/dockerd.init
+--- a/feeds/packages/utils/dockerd/files/dockerd.init
++++ b/feeds/packages/utils/dockerd/files/dockerd.init
+@@ -153,1 +153,1 @@ process_config() {
+-	local alt_config_file data_root log_level iptables ip6tables bip
++	local alt_config_file data_root storage_driver log_level iptables ip6tables bip
+@@ -172,1 +172,2 @@ process_config() {
+ 	config_get data_root globals data_root "/opt/docker/"
++	config_get storage_driver globals storage_driver ""
+@@ -191,1 +192,2 @@ process_config() {
+ 	json_add_string "data-root" "${data_root}"
++	[ -z "${storage_driver}" ] || json_add_string "storage-driver" "${storage_driver}"
+diff --git a/feeds/packages/utils/dockerd/files/etc/config/dockerd b/feeds/packages/utils/dockerd/files/etc/config/dockerd
+--- a/feeds/packages/utils/dockerd/files/etc/config/dockerd
++++ b/feeds/packages/utils/dockerd/files/etc/config/dockerd
+@@ -10,1 +10,4 @@
+ 	option data_root '/opt/docker/'
++	# vfs preserves the existing F2FS-backed data root without relying on
++	# overlayfs security.capability xattrs during layer extraction.
++	option storage_driver 'vfs'

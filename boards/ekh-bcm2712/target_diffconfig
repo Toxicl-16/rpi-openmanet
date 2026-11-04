@@ -1,0 +1,137 @@
+CONFIG_TARGET_bcm27xx=y
+CONFIG_TARGET_bcm27xx_bcm2712=y
+CONFIG_TARGET_bcm27xx_bcm2712_DEVICE_rpi-5=y
+
+# --- First-boot LAN addressing (OpenMANET fresh-flash scheme) ---
+# Stock OpenWrt uses 192.168.1.1, which collides with most home routers.
+# 10.41.254.1/24 is the OpenMANET first-boot address; later mesh setup
+# lives in the wider 10.41.0.0/16 space. Also used for failsafe/preinit.
+CONFIG_IMAGEOPT=y
+CONFIG_PREINITOPT=y
+CONFIG_TARGET_PREINIT_IP="10.41.254.1"
+CONFIG_TARGET_PREINIT_NETMASK="255.255.255.0"
+CONFIG_TARGET_PREINIT_BROADCAST="10.41.254.255"
+CONFIG_TARGET_DEFAULT_LAN_IP_FROM_PREINIT=y
+
+# --- Image partition sizing ---
+# Default 104 MB rootfs is far too small for the LuCI stack, Docker, and
+# OpenTAKServer container storage. 4 GB leaves room for ARM64 TAK layers.
+CONFIG_TARGET_KERNEL_PARTSIZE=64
+CONFIG_TARGET_ROOTFS_PARTSIZE=4096
+
+# Docker image extraction on the F2FS-backed writable overlay needs security
+# xattrs. Use the vfs driver below because overlay2 cannot persist the
+# security.capability xattr on this layout.
+CONFIG_KERNEL_F2FS_FS_SECURITY=y
+CONFIG_PACKAGE_libcap=y
+CONFIG_PACKAGE_libcap-bin=y
+
+# --- Morse HaLow driver + firmware ---
+CONFIG_PACKAGE_kmod-morse=y
+CONFIG_PACKAGE_netifd-morse=y
+CONFIG_PACKAGE_morsecli=y
+CONFIG_PACKAGE_morse-fw-6108=y
+CONFIG_PACKAGE_morse-fw-8108=y
+CONFIG_PACKAGE_morse-board-config=y
+CONFIG_PACKAGE_morse-regdb=y
+
+# Driver bus support: SPI for the Seeed HAT path, SDIO retained for parity with Pi4
+CONFIG_MORSE_SPI=y
+CONFIG_MORSE_SDIO=y
+
+# --- Pi 5 onboard 2.4/5 GHz Wi-Fi (BCM43455 via brcmfmac/SDIO) ---
+# These are pulled in automatically by Device/rpi-5 DEVICE_PACKAGES, but
+# selecting them explicitly here makes the dependency on regular Wi-Fi obvious
+# in the diffconfig and survives any future Device/rpi-5 changes.
+CONFIG_PACKAGE_kmod-brcmfmac=y
+CONFIG_PACKAGE_cypress-firmware-43455-sdio=y
+CONFIG_PACKAGE_brcmfmac-nvram-43455-sdio=y
+CONFIG_PACKAGE_wpad-basic-mbedtls=y
+
+# --- mDNS responder (required by the Morse LuCI wizard for device discovery) ---
+CONFIG_PACKAGE_umdns=y
+
+# --- batman-adv layer-2 mesh (used by Haven mesh / setup-haven-point.sh) ---
+CONFIG_PACKAGE_kmod-batman-adv=y
+CONFIG_PACKAGE_batctl=y
+CONFIG_PACKAGE_luci-proto-batman-adv=y
+
+# The Pi 5 MANET path does not use legacy AR8216 switch hardware.  Keep the
+# unrelated swconfig driver out of this profile; it is not part of the Morse
+# MM8108 USB stack and is not compatible with the 6.6 kernel hardening checks.
+# CONFIG_PACKAGE_kmod-swconfig is not set
+# CONFIG_PACKAGE_kmod-switch-ar8xxx is not set
+# CONFIG_PACKAGE_kmod-gpio-button-hotplug is not set
+# CONFIG_PACKAGE_kmod-mdio-netlink is not set
+# CONFIG_PACKAGE_kmod-zram is not set
+
+# This node profile selects only the Pi 5/Morse/OpenMANET packages below.
+# Do not compile the entire OpenWrt kernel module universe.
+# CONFIG_ALL_KMODS is not set
+# CONFIG_ALL_NONSHARED is not set
+
+# The shared Morse profile offers OpenVPN for broader field deployments; the
+# vanilla Pi 5 image does not include that optional VPN bundle.
+# CONFIG_PACKAGE_openvpn-openssl is not set
+# CONFIG_PACKAGE_luci-app-openvpn is not set
+
+# --- S1G/HaLow auth stack ---
+CONFIG_PACKAGE_hostapd_s1g=y
+CONFIG_PACKAGE_wpa_supplicant_s1g=y
+
+# --- 802.11s mesh ---
+CONFIG_PACKAGE_morse_mesh11sd=y
+CONFIG_PACKAGE_iw-full=y
+
+# --- Morse bundle / scripts ---
+CONFIG_PACKAGE_morse-bundle=y
+CONFIG_PACKAGE_morse-mode=y
+# Pi 5 EEPROM reader — provides persistent-vars-storage so wizard-config
+# is not silently dropped (Morse only ships the bcm2711 variant).
+CONFIG_PACKAGE_persistent-vars-storage-bcm2712=y
+# Use the kernel 6.6 donor's tools; both packages install vcgencmd/dtoverlay.
+CONFIG_PACKAGE_bcm27xx-utils=y
+# CONFIG_PACKAGE_bcm27xx-userland is not set
+CONFIG_PACKAGE_wizard-config=y
+# Expose the BusyBox UDHCPC symbol required by wizard-config.
+CONFIG_BUSYBOX_CUSTOM=y
+CONFIG_BUSYBOX_CONFIG_UDHCPC=y
+# Morse wizard calls uci.load(umdns) but its feed ACL omits umdns.
+CONFIG_PACKAGE_luci-acl-umdns=y
+
+# --- LuCI ---
+CONFIG_PACKAGE_luci=y
+CONFIG_PACKAGE_luci-app-morseconfig=y
+# The OpenMANET wizard provides the 802.11s Mesh Point/Mesh Gate workflow,
+# including BATMAN-adv gateway configuration.  This is intentionally selected
+# directly rather than through the broader openmanet-morse-stack metapackage.
+CONFIG_PACKAGE_luci-app-ekhwizards=y
+CONFIG_PACKAGE_luci-app-morseguide=y
+CONFIG_PACKAGE_luci-app-morseupgrade=y
+CONFIG_PACKAGE_luci-lib-morseui=y
+CONFIG_PACKAGE_luci-mod-home=y
+
+# --- OpenMANET configuration theme ---
+# Keep the Morse LuCI applications and use OpenMANET Argon as the default UI.
+CONFIG_PACKAGE_luci-theme-openmanetargon=y
+# The Morse theme defaults run later and would override OpenMANET Argon.
+# The basic Morse AP wizard and Morse themes also define overlapping LuCI
+# entries; exclude them so the OpenMANET wizard is the sole default workflow.
+# CONFIG_PACKAGE_luci-app-morseapwizard is not set
+# CONFIG_PACKAGE_luci-theme-morse is not set
+# CONFIG_PACKAGE_luci-theme-morseargon is not set
+
+# --- OpenMANET manager and configuration theme ---
+# openmanetd's package dependencies pull in Alfred, BATMAN, audio, and the
+# runtime libraries it needs. Keep only the application requested here.
+CONFIG_PACKAGE_openmanetd=y
+
+# Keep the wizard's 802.11s mesh on a BATMAN-V hard interface and bridge only
+# the resulting bat0 device into the HaLow-side network.
+CONFIG_PACKAGE_openmanet-batman-fix=y
+
+# --- OpenTAKServer deployment ---
+# The firmware ships the ARM64 deployment definition and procd service; its
+# package dependencies select Docker and the required TLS/HTTP tools. Images
+# are pulled by Docker on first start.
+CONFIG_PACKAGE_opentakserver=y
