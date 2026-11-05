@@ -3,7 +3,7 @@
 This branch replaces the Docker-based OpenTAKServer deployment in the Pi 5
 image with [GolangTAKServer](https://github.com/grangedevgroup-code/TAK-Backend),
 a single native ARM64 binary. It is an experimental alternative; it does not
-change the stable `v0.5.3-rpi5-safe` release.
+change the stable `v0.5.4-rpi5-safe` release.
 
 ## What is included
 

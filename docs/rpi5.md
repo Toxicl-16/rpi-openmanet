@@ -1,6 +1,6 @@
 # Raspberry Pi 5 safe-release guide
 
-This is the active target for the `v0.5.3-rpi5-safe` release. It is built from
+This is the active target for the `v0.5.4-rpi5-safe` release. It is built from
 the public v0.5.2 baseline with the focused fixes described below.
 
 ## Hardware scope
@@ -77,7 +77,7 @@ modified.
 ## Flashing and first boot
 
 Flash the `*-factory.img.gz` asset from the
-[release page](https://github.com/Toxicl-16/rpi-openmanet/releases/tag/v0.5.3-rpi5-safe)
+[release page](https://github.com/Toxicl-16/rpi-openmanet/releases/tag/v0.5.4-rpi5-safe)
 to the SD card. Connect directly to Ethernet and use:
 
 ```text
