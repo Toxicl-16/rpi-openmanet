@@ -8,20 +8,28 @@
 
 set -u
 
+changed=0
+mesh_iface_sections=""
+mesh_ifnames=""
+ahwlan_bridge=""
+gateway=0
+
 log_msg() {
 	logger -t openmanet-batman "$*" 2>/dev/null || true
 	echo "openmanet-batman: $*"
 }
 
 find_mesh_iface() {
-	local section="$1" mode disabled device
+	local section="$1" mode disabled device ifname
 	config_get mode "$section" mode
 	config_get_bool disabled "$section" disabled 0
 	config_get device "$section" device
+	config_get ifname "$section" ifname
 	[ "$mode" = mesh ] || return 0
 	[ "$disabled" -eq 0 ] || return 0
 	[ -n "$device" ] || return 0
 	mesh_iface_sections="${mesh_iface_sections} ${section}"
+	[ -n "$ifname" ] && mesh_ifnames="${mesh_ifnames} ${ifname}"
 }
 
 find_ahwlan_bridge() {
@@ -33,21 +41,77 @@ find_ahwlan_bridge() {
 	ahwlan_bridge="$section"
 }
 
-ensure_bridge_port() {
-	local section="$1"
-	local ports
-	[ -n "$section" ] || return 0
-	ports="$(uci -q get network."$section".ports 2>/dev/null || true)"
-	case " $ports " in
-		*" bat0 "*) ;;
-		*) uci add_list network."$section".ports='bat0' ;;
+uci_set_type() {
+	local package="$1" section="$2" type="$3" current
+	current="$(uci -q get "$package.$section" 2>/dev/null || true)"
+	[ "$current" = "$type" ] && return 0
+	uci set "$package.$section=$type"
+	changed=1
+}
+
+uci_set_option() {
+	local package="$1" section="$2" option="$3" value="$4" current
+	current="$(uci -q get "$package.$section.$option" 2>/dev/null || true)"
+	[ "$current" = "$value" ] && return 0
+	uci set "$package.$section.$option=$value"
+	changed=1
+}
+
+uci_delete_option() {
+	local package="$1" section="$2" option="$3"
+	if uci -q get "$package.$section.$option" >/dev/null 2>&1; then
+		uci delete "$package.$section.$option"
+		changed=1
+	fi
+}
+
+uci_add_list_if_missing() {
+	local package="$1" section="$2" option="$3" value="$4" values
+	values="$(uci -q get "$package.$section.$option" 2>/dev/null || true)"
+	case " $values " in
+		*" $value "*) ;;
+		*)
+			uci add_list "$package.$section.$option=$value"
+			changed=1
+			;;
 	esac
 }
 
+uci_del_list_if_present() {
+	local package="$1" section="$2" option="$3" value="$4" values
+	values="$(uci -q get "$package.$section.$option" 2>/dev/null || true)"
+	case " $values " in
+		*" $value "*)
+			uci del_list "$package.$section.$option=$value"
+			changed=1
+			;;
+	esac
+}
+
+ensure_bridge_port() {
+	local section="$1" port
+	[ -n "$section" ] || return 0
+
+	# The mesh radio is a BATMAN hard interface, never a direct bridge port.
+	# ifname is only used when a configuration explicitly provides one; the
+	# wireless 'device' option is a radio section name, not a netdev name.
+	for port in $mesh_ifnames; do
+		uci_del_list_if_present network "$section" ports "$port"
+	done
+
+	# A mesh gate uses eth0 as its independent DHCP uplink. It must not be
+	# pulled into the HaLow bridge by the wizard's bridge-mode path.
+	[ "$gateway" -eq 1 ] && uci_del_list_if_present network "$section" ports eth0
+	uci_add_list_if_missing network "$section" ports bat0
+}
+
 repair() {
-	local iface index hardif gate
+	local iface index hardif gate mode
+	mode="${1:-start}"
+	changed=0
 
 	mesh_iface_sections=""
+	mesh_ifnames=""
 	config_load wireless
 	config_foreach find_mesh_iface wifi-iface
 	[ -n "$mesh_iface_sections" ] || {
@@ -55,52 +119,87 @@ repair() {
 		return 0
 	}
 
-	uci set network.bat0='interface'
-	uci set network.bat0.proto='batadv'
-	uci set network.bat0.routing_algo='BATMAN_V'
-	uci set network.bat0.multicast_mode='0'
-	uci set network.bat0.bridge_loop_avoidance='1'
+	uci_set_type network bat0 interface
+	uci_set_option network bat0 proto batadv
+	uci_set_option network bat0 routing_algo BATMAN_V
+	uci_set_option network bat0 bonding 1
+	uci_set_option network bat0 aggregated_ogms 1
+	uci_set_option network bat0 ap_isolation 0
+	uci_set_option network bat0 fragmentation 1
+	uci_set_option network bat0 multicast_mode 1
+	uci_set_option network bat0 bridge_loop_avoidance 1
+	uci_set_option network bat0 distributed_arp_table 1
+	uci_set_option network bat0 hop_penalty 30
+	uci_set_option network bat0 orig_interval 1000
+	uci_set_option network bat0 isolation_mark '0x00000000/0x00000000'
+	uci_delete_option network bat0 disabled
 
 	gate="$(uci -q get mesh11sd.mesh_params.mesh_gate_announcements 2>/dev/null || true)"
 	case "$gate" in
-		0) uci set network.bat0.gw_mode='client' ;;
-		1) uci set network.bat0.gw_mode='server' ;;
-		*) uci -q delete network.bat0.gw_mode || true ;;
+		0)
+			uci_set_option network bat0 gw_mode client
+			gateway=0
+			;;
+		1)
+			uci_set_option network bat0 gw_mode server
+			gateway=1
+			;;
+		*)
+			uci_delete_option network bat0 gw_mode
+			gateway=0
+			;;
 	esac
 
 	index=0
 	for iface in $mesh_iface_sections; do
 		hardif="batmesh${index}"
-		uci set network."$hardif"='interface'
-		uci set network."$hardif".proto='batadv_hardif'
-		uci set network."$hardif".master='bat0'
-		uci set wireless."$iface".network="$hardif"
-		uci set wireless."$iface".mesh_fwding='0'
+		uci_set_type network "$hardif" interface
+		uci_set_option network "$hardif" proto batadv_hardif
+		uci_set_option network "$hardif" master bat0
+		uci_set_option wireless "$iface" network "$hardif"
+		uci_set_option wireless "$iface" mesh_fwding 0
 		index=$((index + 1))
 	done
 
-	# Keep the existing ahwlan bridge and its existing ports. Only add bat0;
-	# never move the Pi 5 gateway Ethernet uplink into this bridge.
+	# Keep the wizard's existing ahwlan addressing and bridge section, but make
+	# sure its device is the BATMAN-facing bridge.
 	ahwlan_bridge=""
 	config_load network
 	config_foreach find_ahwlan_bridge device
 	if [ -z "$ahwlan_bridge" ] && uci -q get network.ahwlan >/dev/null 2>&1; then
 		ahwlan_bridge='ahwlan_dev'
-		uci set network."$ahwlan_bridge"='device'
-		uci set network."$ahwlan_bridge".type='bridge'
-		uci set network."$ahwlan_bridge".name='br-ahwlan'
-		uci set network.ahwlan.device='br-ahwlan'
+		uci_set_type network "$ahwlan_bridge" device
+		uci_set_option network "$ahwlan_bridge" type bridge
+		uci_set_option network "$ahwlan_bridge" name br-ahwlan
 	fi
+	[ -n "$ahwlan_bridge" ] && uci_set_option network ahwlan device br-ahwlan
 	ensure_bridge_port "$ahwlan_bridge"
 
-	uci -q set mesh11sd.mesh_params.mesh_fwding='0' || true
-	uci commit network
-	uci commit wireless
-	uci commit mesh11sd 2>/dev/null || true
+	uci_set_option mesh11sd mesh_params mesh_fwding 0
+	uci_set_option mesh11sd mesh_params mesh_nolearn 1
+
+	# The gate's Ethernet is an independent DHCP uplink, not a port of the
+	# HaLow bridge. Preserve the existing firewall rules on wan while making
+	# the physical attachment explicit.
+	if [ "$gateway" -eq 1 ]; then
+		uci_set_type network wan interface
+		uci_set_option network wan proto dhcp
+		uci_set_option network wan device eth0
+	fi
+
+	if [ "$changed" -eq 1 ]; then
+		uci commit network
+		uci commit wireless
+		uci commit mesh11sd 2>/dev/null || true
+		if [ "$mode" = reload ]; then
+			ubus call network reload >/dev/null 2>&1 || true
+			/sbin/wifi reload >/dev/null 2>&1 || true
+		fi
+	fi
 	log_msg "BATMAN-V topology repaired (${index} mesh hard interface(s))"
 }
 
 case "${1:-repair}" in
-	repair) repair ;;
-	*) echo "usage: $0 repair" >&2; exit 2 ;;
+	repair) repair "${2:-start}" ;;
+	*) echo "usage: $0 repair [start|reload]" >&2; exit 2 ;;
 esac
