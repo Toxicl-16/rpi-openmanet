@@ -11,5 +11,6 @@ HTTPS 8443 and 8446. Plain TCP, UDP, and HTTP are disabled in the default
 profile. Port 8080 is intentionally unused by this service. Create client
 connection packages or QR codes from the dashboard.
 
-The packaged binary is GolangTAKServer 1.6.3 for Linux ARM64. Its upstream
-license is installed at /opt/golangtakserver/LICENSE.
+The packaged binary is GolangTAKServer 1.6.3 for Linux ARM64, built from the
+upstream `golangtakserver-v1.6.3` source with the OpenMANET QR layout fix. Its
+upstream license is installed at /opt/golangtakserver/LICENSE.

@@ -1,0 +1,15 @@
+--- a/GolangTAKServer/web/static/style.css
++++ b/GolangTAKServer/web/static/style.css
+@@ -403,8 +403,9 @@ details.more[open] > summary::after { transform: rotate(-135deg) translate(-2px, -2px); }
+ details.more[open] > summary { border-bottom: 1px solid var(--border); }
+ details.more > .inner { padding: 16px; }
+ 
+-.qr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 16px; margin: 0 0 8px; }
+-.qr { background: var(--panel); border: 1px solid var(--border); padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+-.qr img { display: block; width: 100%; max-width: 232px; height: auto; background: #fff; padding: 8px; image-rendering: pixelated; }
++.qr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr)); gap: 16px; margin: 0 0 8px; }
++.qr { min-width: 0; overflow: hidden; background: var(--panel); border: 1px solid var(--border); padding: 18px; display: flex; flex-direction: column; gap: 10px; }
++.qr img { display: block; width: min(100%, 232px); max-width: 100%; height: auto; background: #fff; padding: 8px; image-rendering: pixelated; }
++.qr .break { min-width: 0; max-width: 100%; overflow-wrap: anywhere; word-break: break-word; white-space: normal; }
+ .qr h3 { margin: 0; font-size: 15px; }
+ .qr p { margin: 0; }
