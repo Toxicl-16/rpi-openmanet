@@ -41,7 +41,7 @@ Read these before running any command:
 ## 1. Flash the image
 
 Download the factory image from the
-[OpenMANET release page](https://github.com/Toxicl-16/rpi-openmanet/releases/tag/v0.5.2-rpi5-safe)
+[OpenMANET release page](https://github.com/Toxicl-16/rpi-openmanet/releases/tag/v0.5.3-rpi5-safe)
 and verify its checksum using the accompanying rpi5-sha256sums.txt file.
 
 ### macOS

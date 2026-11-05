@@ -7,7 +7,7 @@ Raspberry Pi 5 (`bcm2712`) with a Morse Micro MM8108 USB HaLow radio.
 ## Current release
 
 Download the pre-built images and packages from
-[v0.5.2-rpi5-safe](https://github.com/Toxicl-16/rpi-openmanet/releases/tag/v0.5.2-rpi5-safe).
+[v0.5.3-rpi5-safe](https://github.com/Toxicl-16/rpi-openmanet/releases/tag/v0.5.3-rpi5-safe).
 The release includes factory and sysupgrade images, checksums, the image
 manifest, build metadata, and all generated OpenWrt packages.
 
@@ -34,7 +34,7 @@ The Pi 5 image includes:
 
 - Morse MM8108 USB driver and firmware, 802.11s mesh support, and the OpenMANET
   mesh wizard
-- BATMAN-adv, `batctl`, `openmanetd`, and the OpenMANET Argon LuCI theme
+- BATMAN-adv, `batctl`, `openmanetd`, and the OpenMANET Dark LuCI theme
 - Docker, Compose, containerd, runc, and the OpenTAKServer deployment package
 - Raspberry Pi 5 onboard Wi-Fi support
 

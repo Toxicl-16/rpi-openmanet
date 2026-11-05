@@ -1,7 +1,7 @@
 # Raspberry Pi 3B+ compatibility note
 
 The Raspberry Pi 3B+ source target is retained to preserve the previously
-working OpenMANET build. This repository's `v0.5.2-rpi5-safe` release is a Pi 5
+working OpenMANET build. This repository's `v0.5.3-rpi5-safe` release is a Pi 5
 release; it does not publish or replace a Pi 3B+ image.
 
 The Pi 3B+ board configuration is kept under

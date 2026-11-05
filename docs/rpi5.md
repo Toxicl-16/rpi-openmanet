@@ -1,6 +1,6 @@
 # Raspberry Pi 5 safe-release guide
 
-This is the active target for the `v0.5.2-rpi5-safe` release. It is built from
+This is the active target for the `v0.5.3-rpi5-safe` release. It is built from
 the public v0.5.2 baseline with the focused fixes described below.
 
 ## Hardware scope
@@ -17,7 +17,7 @@ status is based on source validation and successful image compilation.
 
 The profile is [`boards/ekh-bcm2712/target_diffconfig`](../boards/ekh-bcm2712/target_diffconfig).
 It selects the Pi 5 6.6 kernel target, Morse HaLow support, the OpenMANET mesh
-wizard, BATMAN-adv, Docker, OpenTAKServer, and the OpenMANET Argon theme.
+wizard, BATMAN-adv, Docker, OpenTAKServer, and the OpenMANET Dark theme.
 
 The image uses a 64 MiB FAT boot partition and a 4 GiB SquashFS/root partition.
 The writable F2FS overlay and Docker data live in the root partition. The
@@ -75,7 +75,7 @@ modified.
 ## Flashing and first boot
 
 Flash the `*-factory.img.gz` asset from the
-[release page](https://github.com/Toxicl-16/rpi-openmanet/releases/tag/v0.5.2-rpi5-safe)
+[release page](https://github.com/Toxicl-16/rpi-openmanet/releases/tag/v0.5.3-rpi5-safe)
 to the SD card. Connect directly to Ethernet and use:
 
 ```text
