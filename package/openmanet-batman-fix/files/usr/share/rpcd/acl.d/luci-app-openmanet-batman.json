@@ -1,0 +1,10 @@
+{
+    "luci-app-openmanet-batman": {
+        "description": "Allow BATMAN-V topology repair",
+        "write": {
+            "ubus": {
+                "openmanet-batman": [ "repair" ]
+            }
+        }
+    }
+}

@@ -1,0 +1,25 @@
+#!/bin/sh
+
+case "$1" in
+	list)
+		echo '{"repair":{"call":true}}'
+		;;
+	call)
+		case "$2" in
+		repair)
+			if /usr/sbin/openmanet-batman repair reload >/dev/null 2>&1; then
+				echo '{"ok":true}'
+			else
+				echo '{"ok":false}'
+			fi
+			;;
+		*)
+			echo '{"error":"method not found"}'
+			exit 1
+			;;
+		esac
+		;;
+	*)
+		exit 1
+		;;
+esac

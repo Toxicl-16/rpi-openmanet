@@ -1,0 +1,13 @@
+{
+    "admin/network/openmanet-batman": {
+        "title": "BATMAN Repair",
+        "order": 95,
+        "action": {
+            "type": "view",
+            "path": "openmanet/batman"
+        },
+        "depends": {
+            "acl": [ "luci-app-openmanet-batman" ]
+        }
+    }
+}

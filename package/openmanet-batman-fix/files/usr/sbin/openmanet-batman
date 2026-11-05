@@ -6,7 +6,10 @@
 
 . /lib/functions.sh
 
-set -u
+# Do not enable `set -u` here. OpenWrt's config shell library intentionally
+# reads variables such as IPKG_INSTROOT and CONFIG_LIST_STATE that are unset
+# during normal runtime. Treating those variables as fatal breaks every
+# repair invocation before UCI can be inspected or corrected.
 
 changed=0
 mesh_iface_sections=""
