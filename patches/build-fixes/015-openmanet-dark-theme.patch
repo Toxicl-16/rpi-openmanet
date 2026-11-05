@@ -1,0 +1,260 @@
+diff --git a/feeds/openmanet/luci/luci-theme-openmanetargon/Makefile b/feeds/openmanet/luci/luci-theme-openmanetargon/Makefile
+index 7fd0f23..0f20f9f 100644
+--- a/feeds/openmanet/luci/luci-theme-openmanetargon/Makefile
++++ b/feeds/openmanet/luci/luci-theme-openmanetargon/Makefile
+@@ -3 +3 @@
+-LUCI_TITLE:=LuCI OpenMANET Argon Theme
++LUCI_TITLE:=LuCI OpenMANET Dark Theme
+diff --git a/feeds/openmanet/luci/luci-theme-openmanetargon/luasrc/view/themes/openmanetargon/header.htm b/feeds/openmanet/luci/luci-theme-openmanetargon/luasrc/view/themes/openmanetargon/header.htm
+index f5a79bd..9a5e9b2 100644
+--- a/feeds/openmanet/luci/luci-theme-openmanetargon/luasrc/view/themes/openmanetargon/header.htm
++++ b/feeds/openmanet/luci/luci-theme-openmanetargon/luasrc/view/themes/openmanetargon/header.htm
+@@ -103,0 +104 @@
++	<link rel="stylesheet" href="<%=media%>/css/openmanet-dark.css">
+diff --git a/feeds/openmanet/luci/luci-theme-openmanetargon/htdocs/luci-static/openmanetargon/css/openmanet-dark.css b/feeds/openmanet/luci/luci-theme-openmanetargon/htdocs/luci-static/openmanetargon/css/openmanet-dark.css
+new file mode 100644
+index 0000000..3e5d5d5
+--- /dev/null
++++ b/feeds/openmanet/luci/luci-theme-openmanetargon/htdocs/luci-static/openmanetargon/css/openmanet-dark.css
+@@ -0,0 +1,241 @@
++/*
++ * OpenMANET Dark theme surface system.
++ *
++ * This file is intentionally loaded after cascade.css and dark.css.  The
++ * base Argon stylesheet supplies the layout and component geometry; this
++ * file owns the dark palette so LuCI pages and the OpenMANET home view use
++ * the same surfaces without application-specific overrides.
++ */
++
++:root {
++  --home-surface: #2d2d2d;
++  --home-surface-raised: #252526;
++  --home-border: #555555;
++  --home-text: #cccccc;
++  --home-muted-text: #adb5bd;
++  --background-color: #1e1e1e;
++  --background-color-high: #252526;
++  --card-color: #2d2d2d;
++  --menu-bg-color: #333333;
++  --menu-color: #cccccc;
++  --menu-color-hover: #483d8b;
++  --main-menu-color: #cccccc;
++  --submenu-bg-hover: #3c3c3c;
++  --bar-bg: #252526;
++  --neutral: #252526;
++  --secondary: #252526;
++  --lighter: #3c3c3c;
++  --gray-dark: #cccccc;
++  --default: #e6e6e6;
++  --dark: #1e1e1e;
++  --primary: #5e72e4;
++  --dark-primary: #483d8b;
++  --text-color: #cccccc;
++}
++
++html,
++body,
++body .main,
++.main-right,
++#maincontent,
++#maincontent > .container {
++  background-color: var(--background-color);
++  color: var(--text-color);
++}
++
++body a,
++body a:link,
++body a:visited,
++body a:active {
++  color: #a5b2ff;
++}
++
++body a:hover,
++body a:focus-visible {
++  color: #d0d7ff;
++}
++
++.main .main-left {
++  background-color: var(--menu-bg-color);
++}
++
++.main .main-left::-webkit-scrollbar-thumb {
++  background-color: var(--home-surface-raised);
++}
++
++.main .main-left::-webkit-scrollbar-track {
++  background-color: var(--menu-bg-color);
++}
++
++header.bg-primary,
++header::after {
++  background-color: var(--background-color);
++}
++
++/* LuCI content surfaces and the home dashboard. */
++.cbi-section,
++.cbi-section-node,
++.panel,
++.panel-title,
++.alert,
++.alert-message,
++.modal,
++.modal-content,
++.tabs,
++.cbi-tabmenu,
++.cbi-dropdown,
++.dropdown-menu,
++.well,
++.cards .card,
++.cards .card h1,
++.cards .card h2,
++.cards .card h3,
++.cards .card h4,
++.cards .card h5,
++.cards .card details > dl,
++.cards .devices-box {
++  background-color: var(--home-surface);
++  color: var(--home-text);
++  border-color: var(--home-border);
++}
++
++.cards .card,
++.cards .card h1,
++.cards .card h2,
++.cards .card h3,
++.cards .card h4,
++.cards .card h5,
++.cards .card details > dl {
++  background-color: var(--home-surface-raised);
++}
++
++.cards .card {
++  box-shadow: 0 0 1rem 0 rgb(0 0 0 / 45%);
++}
++
++.cards .card .small-contents,
++.cards .card .max-contents,
++.cards .card .network-interfaces,
++.cards .card .ifacebox {
++  color: var(--home-text);
++}
++
++#prplmesh-topology,
++#mesh11s-topology,
++#prplmesh-topology div.graphcontainer > svg div.node,
++#mesh11s-topology div.graphcontainer > svg div.node,
++#prplmesh-topology div.graphcontainer > svg div.node-disabled,
++#mesh11s-topology div.graphcontainer > svg div.node-disabled {
++  background-color: var(--home-surface-raised);
++  border-color: var(--home-border);
++}
++
++#homepage-modal-overlay .modal {
++  background-color: var(--home-surface);
++  color: var(--home-text);
++}
++
++/* Tables, form controls, menus, and popovers must not fall back to white. */
++table,
++thead,
++tbody,
++tfoot,
++tr,
++.table,
++.tr,
++.cbi-section-table-row,
++.cbi-section-table-cell,
++.cbi-value-field,
++.cbi-value-title {
++  color: var(--home-text);
++  border-color: var(--home-border);
++}
++
++table > thead > tr > th,
++table > tbody > tr > th,
++table > tfoot > tr > th,
++.tr.cbi-section-table-titles > .th,
++.cbi-section-table .cbi-section-table-titles .cbi-section-table-cell {
++  background-color: var(--home-surface-raised);
++}
++
++table > tbody > tr:nth-of-type(2n),
++.table > .tbody > .tr:nth-of-type(2n),
++.cbi-rowstyle-1,
++.cbi-tabcontainer > .cbi-value:nth-of-type(2n) {
++  background-color: var(--home-surface-raised);
++}
++
++input,
++select,
++textarea,
++.cbi-dropdown,
++.cbi-input-textarea {
++  background-color: var(--home-surface-raised) !important;
++  color: var(--home-text);
++  border-color: var(--home-border);
++}
++
++input:focus,
++select:focus,
++textarea:focus,
++.cbi-dropdown:focus {
++  border-color: var(--primary);
++  outline-color: var(--primary);
++}
++
++select option,
++.dropdown-menu,
++.dropdown-menu a,
++.dropdown-menu li {
++  background-color: var(--home-surface-raised);
++  color: var(--home-text);
++}
++
++.dropdown-menu a:hover,
++.dropdown-menu a:focus,
++.cbi-dropdown-option:hover,
++.cbi-dropdown-option:focus {
++  background-color: var(--menu-color-hover);
++  color: #ffffff;
++}
++
++.cbi-button,
++.btn,
++button {
++  color: #ffffff;
++  background-color: var(--dark-primary);
++  border-color: var(--dark-primary);
++}
++
++.cbi-button:hover,
++.cbi-button:focus-visible,
++.btn:hover,
++.btn:focus-visible,
++button:hover,
++button:focus-visible {
++  background-color: var(--primary);
++  border-color: var(--primary);
++  color: #ffffff;
++}
++
++.cbi-progressbar,
++.cbi-progressbar > div {
++  background-color: var(--home-surface-raised);
++}
++
++.cbi-progressbar > div {
++  background-color: var(--primary);
++}
++
++@media (max-width: 768px) {
++  .main .main-left {
++    background-color: var(--menu-bg-color);
++  }
++
++  .main-right > #maincontent > .container {
++    margin-left: 0.75rem;
++    margin-right: 0.75rem;
++    width: calc(100% - 1.5rem);
++  }
++}

@@ -34,8 +34,8 @@ cp patches/build-fixes/010-perl-sdbm-gcc15.patch \
     feeds/packages/lang/perl/patches/1000-gcc15-sdbm.patch
 apply_patch_once patches/build-fixes/011-luci-runtime-lemon-prototypes.patch
 apply_patch_once patches/build-fixes/012-bash-host-gnu17.patch
-apply_patch_once patches/build-fixes/013-openmanet-home-dark-theme.patch
 apply_patch_once patches/build-fixes/014-dockerd-f2fs-vfs-config.patch
+apply_patch_once patches/build-fixes/015-openmanet-dark-theme.patch
 # These unused prpl forks conflict with the 23.05 LuCI UPnP dependency graph.
 # The Pi 5 image uses firewall4 and does not select either fork.
 ./scripts/feeds uninstall miniupnpd-prpl miniupnpd2
