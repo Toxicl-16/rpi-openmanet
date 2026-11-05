@@ -4,7 +4,7 @@ PKG_NAME:=golangtakserver
 PKG_VERSION:=1.6.3
 PKG_RELEASE:=2
 PKG_SOURCE:=golangtakserver-linux-arm64-openmanet-ui1
-PKG_SOURCE_URL:=https://github.com/Toxicl-16/rpi-openmanet/releases/download/v0.5.7-native-tak
+PKG_SOURCE_URL:=https://github.com/Toxicl-16/rpi-openmanet/releases/download/v0.5.8-native-tak
 PKG_HASH:=e4d4bc6dbe47d3c5a90b289271461f15b5210ba50d9ca74f56a77c5110d74541
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
