@@ -1,7 +1,10 @@
 #!/bin/sh /etc/rc.common
 
 USE_PROCD=1
-START=12
+# The Morse board configuration can create wireless/network UCI after the
+# earliest init scripts have run. Start after those generators; the iface
+# hotplug hook also repairs the topology when ahwlan first comes up.
+START=99
 
 start_service() {
 	[ -x /usr/sbin/openmanet-batman ] || return 0

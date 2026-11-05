@@ -17,7 +17,11 @@ grep -F 'network wan device eth0' "$script" >/dev/null
 grep -F '. /lib/functions.sh' "$script" >/dev/null
 grep -F 'procd_add_reload_trigger network wireless mesh11sd' "$repo/package/openmanet-batman-fix/files/etc/init.d/openmanet-batman" >/dev/null
 grep -F 'repair reload' "$repo/package/openmanet-batman-fix/files/etc/init.d/openmanet-batman" >/dev/null
+grep -F 'START=99' "$repo/package/openmanet-batman-fix/files/etc/init.d/openmanet-batman" >/dev/null
+grep -F 'ahwlan|bat0|batmesh*)' "$repo/package/openmanet-batman-fix/files/etc/hotplug.d/iface/99-openmanet-batman" >/dev/null
+grep -F 'openmanet-batman repair reload' "$repo/package/openmanet-batman-fix/files/etc/hotplug.d/iface/99-openmanet-batman" >/dev/null
 sh -n "$script"
 sh -n "$repo/package/openmanet-batman-fix/files/etc/init.d/openmanet-batman"
+sh -n "$repo/package/openmanet-batman-fix/files/etc/hotplug.d/iface/99-openmanet-batman"
 
 echo 'PASS: OpenMANET BATMAN-V source checks'

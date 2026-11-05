@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# First-boot board setup and the mesh wizard can write UCI after the BATMAN
+# init service's initial pass. Repair once the HaLow-side network is live.
+# This is deliberately based on UCI interface names, not radio numbering.
+[ "${ACTION:-}" = ifup ] || exit 0
+
+case "${INTERFACE:-}" in
+	ahwlan|bat0|batmesh*) ;;
+	*) exit 0 ;;
+esac
+
+[ -x /usr/sbin/openmanet-batman ] || exit 0
+/usr/sbin/openmanet-batman repair reload >/dev/null 2>&1

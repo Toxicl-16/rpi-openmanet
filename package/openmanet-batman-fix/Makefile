@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openmanet-batman-fix
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 PKG_LICENSE:=GPL-2.0-only
 PKG_MAINTAINER:=OpenMANET / Build with Parallel integration
 
@@ -25,10 +25,11 @@ define Build/Compile
 endef
 
 define Package/openmanet-batman-fix/install
-	$(INSTALL_DIR) $(1)/etc/init.d $(1)/etc/rc.d $(1)/usr/sbin
+	$(INSTALL_DIR) $(1)/etc/hotplug.d/iface $(1)/etc/init.d $(1)/etc/rc.d $(1)/usr/sbin
+	$(INSTALL_BIN) ./files/etc/hotplug.d/iface/99-openmanet-batman $(1)/etc/hotplug.d/iface/99-openmanet-batman
 	$(INSTALL_BIN) ./files/etc/init.d/openmanet-batman $(1)/etc/init.d/openmanet-batman
 	$(INSTALL_BIN) ./files/usr/sbin/openmanet-batman $(1)/usr/sbin/openmanet-batman
-	$(LN) ../init.d/openmanet-batman $(1)/etc/rc.d/S12openmanet-batman
+	$(LN) ../init.d/openmanet-batman $(1)/etc/rc.d/S99openmanet-batman
 endef
 
 $(eval $(call BuildPackage,openmanet-batman-fix))
