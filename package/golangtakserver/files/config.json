@@ -1,0 +1,35 @@
+{
+  "name": "OpenMANET TAK Server",
+  "ports": {
+    "tcp": 8087,
+    "tcpAlt": 8088,
+    "tls": 8089,
+    "udp": 8087,
+    "http": 8090,
+    "https": 8443,
+    "enroll": 8446,
+    "websocket": 8091,
+    "api": 19023
+  },
+  "allowAnonymous": true,
+  "anonymousGroup": "__ANON__",
+  "protobuf": true,
+  "replay": "all",
+  "channels": true,
+  "mesh": {
+    "enabled": true,
+    "send": false,
+    "groups": [
+      "239.2.3.1:6969",
+      "224.10.10.1:17012"
+    ],
+    "ttl": 1
+  },
+  "videoServer": {
+    "enabled": false
+  },
+  "voice": {
+    "enabled": false
+  },
+  "logLevel": "info"
+}
