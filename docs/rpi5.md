@@ -16,8 +16,10 @@ status is based on source validation and successful image compilation.
 ## Image profile
 
 The profile is [`boards/ekh-bcm2712/target_diffconfig`](../boards/ekh-bcm2712/target_diffconfig).
-It selects the Pi 5 6.6 kernel target, Morse HaLow support, the OpenMANET mesh
-wizard, BATMAN-adv, Docker, OpenTAKServer, and the OpenMANET Dark theme.
+The stable profile selects the Pi 5 6.6 kernel target, Morse HaLow support,
+the OpenMANET mesh wizard, BATMAN-adv, Docker, OpenTAKServer, and the
+OpenMANET Dark theme. The experimental native TAK branch replaces the Docker
+deployment; see [EXPERIMENTAL_NATIVE_TAK.md](EXPERIMENTAL_NATIVE_TAK.md).
 
 The image uses a 64 MiB FAT boot partition and a 4 GiB SquashFS/root partition.
 The writable F2FS overlay and Docker data live in the root partition. The

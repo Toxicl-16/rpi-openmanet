@@ -30,7 +30,7 @@ needed.
 
 ## Scope
 
-The Pi 5 image includes:
+The stable Pi 5 image includes:
 
 - Morse MM8108 USB driver and firmware, 802.11s mesh support, and the OpenMANET
   mesh wizard
@@ -42,6 +42,15 @@ OpenTAKServer container images are pulled on first start, so initial deployment
 requires Internet access unless an offline image bundle is supplied. Its web
 UI is served on port 8090; this firmware does not modify the separate port 8080
 application.
+
+## Experimental native TAK branch
+
+The [`experimental-native-tak`](https://github.com/Toxicl-16/rpi-openmanet/tree/experimental-native-tak)
+branch replaces OpenTAKServer and Docker with a native ARM64
+[GolangTAKServer](https://github.com/grangedevgroup-code/TAK-Backend) service.
+It is intended for Pi 5 testing only and is not a replacement for the stable
+release until ATAK/iTAK connectivity has been verified on hardware. See the
+[experimental native TAK guide](docs/EXPERIMENTAL_NATIVE_TAK.md).
 
 The Raspberry Pi 3B+ target remains in the source tree as a compatibility
 reference. This release publishes Pi 5 images only and does not replace the
@@ -118,6 +127,8 @@ This release is a derivative build assembled from the following projects:
   daemon and Alfred integration
 - [OpenTAKServer](https://github.com/brian7704/OpenTAKServer) — the TAK server
   deployed by the included Docker Compose service
+- [GolangTAKServer](https://github.com/grangedevgroup-code/TAK-Backend) — the
+  native ARM64 TAK alternative used by the experimental branch
 - [Morse Micro OpenWrt](https://github.com/MorseMicro/openwrt) and the
   [Morse Micro feed](https://github.com/MorseMicro/morse-feed) — the base SDK,
   HaLow driver integration, and radio firmware packages
