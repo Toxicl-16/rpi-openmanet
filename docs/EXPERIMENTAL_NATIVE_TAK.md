@@ -28,18 +28,15 @@ account. Read the generated administrator password over SSH:
 cat /opt/golangtakserver/admin-password.txt
 ```
 
-Open the dashboard at `https://PI_ADDRESS:8446`. The server also provides an
-HTTP dashboard on port `8090` for a trusted LAN. Port `8080` is intentionally
-not used by this service.
+Open the dashboard at `https://PI_ADDRESS:8446`. The server also provides a
+secure HTTPS dashboard on port `8443`. Plain TCP, UDP, and HTTP are disabled in
+the default profile. Port `8080` is intentionally not used by this service.
 
 TAK clients use:
 
 | Function | Port |
 | --- | ---: |
-| Plain TCP | 8087 |
-| Alternate TCP | 8088 |
 | TLS CoT for ATAK/iTAK/WinTAK | 8089 |
-| HTTP dashboard | 8090 |
 | WebSocket | 8091 |
 | HTTPS API/dashboard | 8443 |
 | Certificate enrollment | 8446 |
@@ -79,3 +76,7 @@ replacement for the stable Docker/OpenTAKServer image.
 The native service does not provide the OpenTAKServer-specific UI, PostGIS
 database, RabbitMQ deployment, or media services. Keep the stable image if
 those features are required.
+
+The default profile disables anonymous access and unencrypted TAK/dashboard
+listeners. Use the TLS listener and a generated client connection package or
+enrollment QR code for ATAK and iTAK.

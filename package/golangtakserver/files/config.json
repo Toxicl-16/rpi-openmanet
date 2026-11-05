@@ -1,17 +1,17 @@
 {
   "name": "OpenMANET TAK Server",
   "ports": {
-    "tcp": 8087,
-    "tcpAlt": 8088,
+    "tcp": 0,
+    "tcpAlt": 0,
     "tls": 8089,
-    "udp": 8087,
-    "http": 8090,
+    "udp": 0,
+    "http": 0,
     "https": 8443,
     "enroll": 8446,
     "websocket": 8091,
     "api": 19023
   },
-  "allowAnonymous": true,
+  "allowAnonymous": false,
   "anonymousGroup": "__ANON__",
   "protobuf": true,
   "replay": "all",
