@@ -91,9 +91,10 @@ changes.
 ## Manual SD-card expansion
 
 Do not resize the card while the Pi is running. Follow
-[rpi5-sd-card-expansion.md](rpi5-sd-card-expansion.md) from native Linux or a
-Linux VM on macOS. The procedure backs up the full card, preserves partition 2's
-start, calculates the SquashFS boundary, and grows the F2FS overlay offline.
+[SD_CARD_RESIZE.md](SD_CARD_RESIZE.md) from native Linux or a Kali/Ubuntu Linux
+VM on macOS. The procedure backs up the full card, preserves partition 2's
+start, calculates the SquashFS boundary with `unsquashfs -s`, and grows the
+F2FS overlay offline.
 
 ## Rebuild and validate
 

@@ -12,8 +12,9 @@ The release includes factory and sysupgrade images, checksums, the image
 manifest, build metadata, and all generated OpenWrt packages.
 
 The published firmware is a Pi 5 SquashFS/F2FS image. It does not resize the
-SD card during boot. Follow [the manual expansion guide](docs/rpi5-sd-card-expansion.md)
-from native Linux or a Linux VM on macOS when more card space is needed.
+SD card during boot. Follow the beginner-friendly [SD-card resize guide](docs/SD_CARD_RESIZE.md)
+from native Linux or a Kali/Ubuntu Linux VM on macOS when more card space is
+needed.
 
 ## What this release fixes
 
