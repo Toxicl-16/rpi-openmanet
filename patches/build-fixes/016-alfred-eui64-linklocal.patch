@@ -1,0 +1,45 @@
+diff --git a/feeds/openmanet/routing/alfred/files/alfred.init b/feeds/openmanet/routing/alfred/files/alfred.init
+index 8baf978..73614b2 100644
+--- a/feeds/openmanet/routing/alfred/files/alfred.init
++++ b/feeds/openmanet/routing/alfred/files/alfred.init
+@@ -15,9 +15,40 @@ vis_enable=0
+ 
+ append_interface()
+ {
++	ensure_eui64_linklocal "$1"
+ 	append "interfaces" "$1" ","
+ }
+ 
++# Alfred binds its IPv6 socket to the EUI-64 address derived from each
++# configured interface's MAC address.  Linux bridges can retain a link-local
++# address from an earlier bridge MAC after their MAC changes when ports are
++# attached, which leaves Alfred running without an active network socket.
++# Add the address derived from the current interface MAC before Alfred starts.
++# The address is calculated at runtime so this works across boards and radio
++# naming schemes.
++ensure_eui64_linklocal()
++{
++	local interface="$1"
++	local mac first second third fourth fifth sixth
++	local linklocal
++
++	[ -r "/sys/class/net/$interface/address" ] || return 0
++	mac="$(cat "/sys/class/net/$interface/address" 2>/dev/null)"
++	[ -n "$mac" ] || return 0
++
++	IFS=: read -r first second third fourth fifth sixth <<EOF
++$mac
++EOF
++	[ -n "$sixth" ] || return 0
++
++	linklocal="$(printf 'fe80::%02x%02x:%02x%02x:%02x%02x' \
++		$((0x$first ^ 2)) $((0x$second)) $((0x$third)) $((0x$fourth)) \
++		$((0x$fifth)) $((0x$sixth)))"
++
++	ip -6 addr show dev "$interface" 2>/dev/null | grep -q " $linklocal/" || \
++		ip -6 addr add "$linklocal/64" dev "$interface" 2>/dev/null || true
++}
++
+ alfred_start() {
+ 	local args=""
+ 	local section="$1"

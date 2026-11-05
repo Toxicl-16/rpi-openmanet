@@ -39,3 +39,4 @@ apply_patch_once patches/build-fixes/015-openmanet-dark-theme.patch
 # These unused prpl forks conflict with the 23.05 LuCI UPnP dependency graph.
 # The Pi 5 image uses firewall4 and does not select either fork.
 ./scripts/feeds uninstall miniupnpd-prpl miniupnpd2
+apply_patch_once patches/build-fixes/016-alfred-eui64-linklocal.patch
