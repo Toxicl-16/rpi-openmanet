@@ -140,12 +140,12 @@ endif
 define Device/rpi-3
   DEVICE_MODEL := 3B/3B+/CM3
   DEVICE_VARIANT := (64bit)
+  DEVICE_DTS_DIR := $(LINUX_DIR)/arch/arm/boot/dts
   DEVICE_ALT0_VENDOR := Raspberry Pi
   DEVICE_ALT0_MODEL := 2B-1.2
   DEVICE_ALT0_VARIANT := (64bit)
   KERNEL_IMG := kernel8.img
   DEVICE_DTS := \
-	broadcom/bcm2710-rpi-2-b \
 	broadcom/bcm2710-rpi-3-b broadcom/bcm2710-rpi-3-b-plus \
 	broadcom/bcm2710-rpi-cm3 \
 	broadcom/bcm2710-rpi-zero-2
