@@ -1,9 +1,8 @@
 # Experimental native TAK service
 
-This branch replaces the Docker-based OpenTAKServer deployment in the Pi 5
+This image replaces the Docker-based OpenTAKServer deployment in the Pi 5
 image with [GolangTAKServer](https://github.com/grangedevgroup-code/TAK-Backend),
-a single native ARM64 binary. It is an experimental alternative; it does not
-change the stable `v0.5.4-rpi5-safe` release.
+a single native ARM64 binary.
 
 ## What is included
 
@@ -18,15 +17,19 @@ The binary and its upstream 0BSD license are installed in
 `/opt/golangtakserver`. The package Makefile pins the release SHA-256 before
 the binary can enter the firmware.
 
-## First boot
+## First boot and credentials
 
-The service starts automatically after networking. On its first start it
-creates the certificate authority, server certificate, and administrator
-account. Read the generated administrator password over SSH:
+The service starts automatically after networking. During the initial
+OpenMANET setup wizard, set a non-empty password for the system `root` account.
+The wizard temporarily passes that same password to the native TAK package,
+which creates or updates the GoLangTAKServer administrator account named
+`root`. After a successful update, the temporary plaintext UCI value is
+deleted. The system password is not recovered from `/etc/shadow`, because
+Linux stores only a one-way hash there.
 
-```sh
-cat /opt/golangtakserver/admin-password.txt
-```
+If the wizard is completed without a password, the TAK account is not
+synchronized. For a clean first test, factory-flash this release and complete
+the wizard with the desired root password before opening the TAK dashboard.
 
 Open the dashboard at `https://PI_ADDRESS:8446`. The server also provides a
 secure HTTPS dashboard on port `8443`. Plain TCP, UDP, and HTTP are disabled in
@@ -53,7 +56,7 @@ issued for a bare private IP address.
 /etc/init.d/golangtakserver status
 ps w | grep '[g]olangtakserver'
 logread | grep -i golangtakserver
-cat /opt/golangtakserver/admin-password.txt
+/usr/bin/golangtakserver user list --data /opt/golangtakserver
 ```
 
 The detailed application log is stored at

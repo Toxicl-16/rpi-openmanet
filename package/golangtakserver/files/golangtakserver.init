@@ -5,8 +5,45 @@ USE_PROCD=1
 
 DATA_ROOT=/opt/golangtakserver
 SERVER=/usr/bin/golangtakserver
+ADMIN_PASSWORD=
+
+load_config() {
+	config_load golangtakserver
+	config_get DATA_ROOT main data_root /opt/golangtakserver
+	config_get ADMIN_PASSWORD main admin_password
+}
+
+sync_admin_account() {
+	[ -n "$ADMIN_PASSWORD" ] || return 0
+
+	(
+		# The server creates its temporary administrator on first start. Retry
+		# until its data store is ready, then replace that account with the root
+		# credentials entered in the OpenMANET password wizard. Never discard the
+		# temporary password until the account update has succeeded.
+		synced=0
+		i=0
+		while [ "$i" -lt 30 ]; do
+			if "$SERVER" user add root --password "$ADMIN_PASSWORD" --admin --data "$DATA_ROOT" >/dev/null 2>&1 || \
+				"$SERVER" user passwd root "$ADMIN_PASSWORD" --data "$DATA_ROOT" >/dev/null 2>&1; then
+				synced=1
+				break
+			fi
+			i=$((i + 1))
+			sleep 1
+		done
+		[ "$synced" = 1 ] || exit 0
+
+		"$SERVER" user del admin --data "$DATA_ROOT" >/dev/null 2>&1 || true
+
+		# Do not leave the system password in a persistent plaintext UCI file.
+		uci -q delete golangtakserver.main.admin_password
+		uci -q commit golangtakserver
+	) &
+}
 
 start_service() {
+	load_config
 	[ -x "$SERVER" ] || return 0
 	mkdir -p "$DATA_ROOT"
 	chmod 0700 "$DATA_ROOT"
@@ -17,6 +54,12 @@ start_service() {
 	procd_set_param stdout 1
 	procd_set_param stderr 1
 	procd_close_instance
+
+	sync_admin_account
+}
+
+service_triggers() {
+	procd_add_reload_trigger golangtakserver
 }
 
 stop_service() {

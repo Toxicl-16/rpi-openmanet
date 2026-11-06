@@ -1,0 +1,58 @@
+diff --git a/feeds/morse/luci/luci-app-ekhwizards/htdocs/luci-static/resources/view/morse/landing.js b/feeds/morse/luci/luci-app-ekhwizards/htdocs/luci-static/resources/view/morse/landing.js
+index 09ec98d..2b498db 100644
+--- a/feeds/morse/luci/luci-app-ekhwizards/htdocs/luci-static/resources/view/morse/landing.js
++++ b/feeds/morse/luci/luci-app-ekhwizards/htdocs/luci-static/resources/view/morse/landing.js
+@@ -31,6 +31,13 @@ const callSetLocaltime = rpc.declare({
+ 	expect: { result: 0 },
+ });
+ 
++const callSetInitAction = rpc.declare({
++	object: 'luci',
++	method: 'setInitAction',
++	params: ['name', 'action'],
++	expect: { result: false },
++});
++
+ const callGetTimezones = rpc.declare({
+ 	object: 'luci',
+ 	method: 'getTimezones',
+@@ -58,6 +65,11 @@ return view.extend({
+ 			halow.loadChannelMap(),
+ 			uci.load('luci'),
+ 			uci.load('wireless').catch(() => null),
++			uci.load('golangtakserver').then(() => {
++				this.golangTakAvailable = true;
++			}).catch(() => {
++				this.golangTakAvailable = false;
++			}),
+ 		]);
+ 	},
+ 
+@@ -76,6 +88,9 @@ return view.extend({
+ 		const wifiDevices = uci.sections('wireless', 'wifi-device').filter(s => s.type === 'mac80211');
+ 
+ 		try {
++			const rootPassword = this.passwordFormData.password.pw1;
++			const syncGolangTakPassword = this.golangTakAvailable && rootPassword != null && rootPassword.length > 0;
++
+ 			for (const m of maps) {
+ 				m.checkDepends();
+ 			}
+@@ -110,2 +125,4 @@ return view.extend({
+-
+-			tasks.push(uci.save());
++			if (syncGolangTakPassword) {
++				uci.set('golangtakserver', 'main', 'admin_password', rootPassword);
++			}
++			tasks.push(uci.save());
+@@ -121,1 +139,9 @@ return view.extend({
+-				window.location.href = L.url('admin', 'selectwizard');
++				const redirect = () => {
++					window.location.href = L.url('admin', 'selectwizard');
++				};
++
++				if (syncGolangTakPassword) {
++					callSetInitAction('golangtakserver', 'restart').then(redirect, redirect);
++				} else {
++					redirect();
++				}

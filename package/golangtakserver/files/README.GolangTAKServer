@@ -1,10 +1,13 @@
-GolangTAKServer is the experimental native TAK service for the Pi 5 image.
+GolangTAKServer is the native TAK service for the Pi 5 image.
 
 It runs without Docker under OpenWrt procd and stores its configuration,
-certificates, users, logs, and data under /opt/golangtakserver. On first boot,
-read the generated administrator password from:
-
-    /opt/golangtakserver/admin-password.txt
+certificates, users, logs, and data under /opt/golangtakserver. During the
+initial OpenMANET setup wizard, the password entered for the system root
+account is also used for the GoLangTAKServer administrator account named
+root. The password is passed through a temporary UCI value and removed after
+the account update succeeds; the one-way password hash in /etc/shadow is not
+read or copied. Complete the wizard with a non-empty password before using
+the TAK dashboard.
 
 The secure TAK listener is TLS 8089. The dashboard and enrollment endpoints use
 HTTPS 8443 and 8446. Plain TCP, UDP, and HTTP are disabled in the default

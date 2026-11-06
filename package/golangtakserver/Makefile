@@ -29,6 +29,7 @@ define Package/golangtakserver/description
 endef
 
 define Package/golangtakserver/conffiles
+/etc/config/golangtakserver
 /opt/golangtakserver/config.json
 endef
 
@@ -43,7 +44,8 @@ define Build/Compile
 endef
 
 define Package/golangtakserver/install
-	$(INSTALL_DIR) $(1)/etc/init.d $(1)/usr/bin $(1)/opt/golangtakserver
+	$(INSTALL_DIR) $(1)/etc/config $(1)/etc/init.d $(1)/usr/bin $(1)/opt/golangtakserver
+	$(INSTALL_CONF) ./files/golangtakserver.config $(1)/etc/config/golangtakserver
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/golangtakserver $(1)/usr/bin/golangtakserver
 	$(INSTALL_BIN) ./files/golangtakserver.init $(1)/etc/init.d/golangtakserver
 	$(INSTALL_CONF) ./files/config.json $(1)/opt/golangtakserver/config.json
