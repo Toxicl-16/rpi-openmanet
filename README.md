@@ -1,18 +1,20 @@
 # OpenMANET Raspberry Pi Safe Firmware
 
 This repository contains the corrected public OpenMANET firmware source based
-on the known-working v0.5.2 baseline. The active release target is the
-Raspberry Pi 5 (`bcm2712`) with a Morse Micro MM8108 USB HaLow radio.
+on the known-working v0.5.2 baseline. Version 1 publishes matching images for
+the Raspberry Pi 5 (`bcm2712`) and Raspberry Pi 3B+ (`bcm2710`), both with
+Morse Micro MM8108 USB HaLow support.
 
 ## Current release
 
 Download the pre-built firmware from
-[v0.5.14](https://github.com/Toxicl-16/rpi-openmanet/releases/tag/v0.5.14).
-The release prioritizes the factory and sysupgrade images, checksums, the
-image manifest, and the SD-card expansion guide.
+[v1.0.0](https://github.com/Toxicl-16/rpi-openmanet/releases/tag/v1.0.0).
+The release contains factory and sysupgrade images for both boards, manifests,
+checksums, release notes, and the SD-card expansion guide.
 
-The published firmware is a Pi 5 SquashFS/F2FS image. It does not resize the
-SD card during boot. Follow the beginner-friendly [SD-card resize guide](docs/SD_CARD_RESIZE.md)
+The published firmware uses SquashFS with an F2FS writable overlay. It does
+not resize the SD card during boot. Follow the beginner-friendly [SD-card
+resize guide](docs/SD_CARD_RESIZE.md)
 from native Linux or a Kali/Ubuntu Linux VM on macOS when more card space is
 needed.
 
@@ -25,6 +27,8 @@ needed.
   `lsetxattr security.capability: operation not supported`.
 - The main OpenMANET portal uses dark surfaces instead of unintended white
   cards and backgrounds.
+- The Pi 3B+ image includes an IWFCam H.264-to-RTSP bridge that waits for the
+  configured camera MAC before starting at boot.
 - GoLangTAKServer no longer conflicts with OpenMANETd: plain TAK TCP uses
   port 8092, while OpenMANETd retains its API on port 8087.
 - Storage expansion is documented as an offline manual operation; there is no
@@ -51,15 +55,16 @@ The firmware includes a native ARM64
 See the [native TAK guide](docs/EXPERIMENTAL_NATIVE_TAK.md) for setup and
 client connection details.
 
-The Raspberry Pi 3B+ target remains in the source tree as a compatibility
-reference. This release publishes Pi 5 images only and does not replace the
-Pi 3B+ configuration.
+The Pi 3B+ image includes the OpenMANET manager, mesh wizard, BATMAN-adv,
+Morse MM8108 support, and the automatic IWFCam RTSP service. The Pi 5 image
+includes native GoLangTAKServer; it does not include Docker or OpenTAKServer.
 
 ## Flash and first boot
 
-1. Flash the `*-factory.img.gz` release asset with Raspberry Pi Imager or an
-   equivalent raw-image tool.
-2. Connect directly to the Pi 5 Ethernet port.
+1. Choose the factory image matching your board (`rpi-3` for Pi 3B+, `rpi-5`
+   for Pi 5) and flash it with Raspberry Pi Imager or an equivalent raw-image
+   tool.
+2. Connect directly to the board's Ethernet port.
 3. Open LuCI at [http://10.41.254.1](http://10.41.254.1), the OpenMANET portal
    at [http://10.41.254.1:8080](http://10.41.254.1:8080), or SSH to
    `root@10.41.254.1`.
@@ -69,8 +74,9 @@ Pi 3B+ configuration.
 The first-boot network is `10.41.254.0/24`; it intentionally does not use
 `192.168.1.1`.
 
-See [docs/rpi5.md](docs/rpi5.md) for the Pi 5 profile, Docker checks, build
-instructions, and validation status.
+See [docs/rpi5.md](docs/rpi5.md) and [docs/rpi3b-plus.md](docs/rpi3b-plus.md)
+for board-specific setup and validation details. For the camera service, see
+[docs/IWFCAM.md](docs/IWFCAM.md).
 
 ## Build from source
 
@@ -83,17 +89,18 @@ From the repository root:
 ./scripts/apply-build-fixes.sh
 ./scripts/morse_setup.sh -b ekh-bcm2712
 CONFIG_ALFRED_GPSD=n make -j"$(nproc)" V=s
+
+# For the Pi 3B+ image:
+./scripts/morse_setup.sh -b ekh-bcm2710
+CONFIG_ALFRED_GPSD=n make -j"$(nproc)" V=s
 ```
 
 `CONFIG_ALFRED_GPSD=n` disables an optional Alfred GPS sub-build that the
 current pinned OpenMANET feed does not pass through correctly. It matches the
 Pi 5 profile, which does not select the GPS service.
 
-Images are written to:
-
-```text
-bin/targets/bcm27xx/bcm2712/
-```
+Pi 5 images are written to `bin/targets/bcm27xx/bcm2712/`; Pi 3B+ images are
+written to `bin/targets/bcm27xx/bcm2710/`.
 
 Run the repository checks with:
 
@@ -102,9 +109,9 @@ git diff --check
 for test in scripts/tests/test-*.sh; do "$test"; done
 ```
 
-The released build compiled successfully and passed all source checks. Physical
-Pi 5 boot and runtime testing were not available in the release build
-environment.
+The release notes distinguish compilation and image inspection from physical
+hardware testing. A successful build does not by itself prove boot or radio
+operation.
 
 ## Upstream sources and licensing
 
@@ -138,6 +145,11 @@ This release is a derivative build assembled from the following projects:
   [routing](https://github.com/openwrt/routing), and
   [LuCI](https://github.com/openwrt/luci) — supporting package feeds pinned in
   [`feeds.conf.default`](feeds.conf.default)
+- [iwfcam-rtsp](https://github.com/Bedz01/iwfcam-rtsp) — the upstream
+  IWFCam UDP protocol and RTSP bridge source, adapted here for the field
+  camera's H.264 Annex-B stream
+- [IWFCam](https://github.com/fersatgit/IWFCam) — the original public
+  reverse-engineering reference for the camera protocol
 
 Please consult each upstream project for its license and attribution terms.
 Those licenses and notices remain part of this source tree and its generated

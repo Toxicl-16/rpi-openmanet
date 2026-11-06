@@ -128,3 +128,7 @@ CONFIG_PACKAGE_openmanet-batman-fix=y
 # This experimental profile intentionally does not select OpenTAKServer or
 # Docker; the stable release keeps the existing container deployment.
 CONFIG_PACKAGE_golangtakserver=y
+
+# Docker on the SquashFS/F2FS overlay needs security xattrs for capabilities.
+CONFIG_KERNEL_F2FS_FS_SECURITY=y
+CONFIG_PACKAGE_libcap-bin=y

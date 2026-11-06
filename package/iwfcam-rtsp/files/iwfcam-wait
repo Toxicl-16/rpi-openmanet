@@ -1,0 +1,47 @@
+#!/bin/sh
+
+# Wait until the camera is visible locally before starting the bridge.
+# The camera may be absent during boot; this process intentionally remains
+# supervised by procd and retries until the station or neighbor appears.
+
+CAMERA_IP="$1"
+CAMERA_MAC="$2"
+BRIDGE="$3"
+RTSP_PORT="$4"
+
+log() {
+	logger -t iwfcam -- "$*"
+}
+
+camera_visible() {
+	[ -n "$CAMERA_MAC" ] || return 0
+
+	# A neighbor entry proves that the MAC is reachable on the local bridge.
+	if ip neigh show 2>/dev/null | tr 'A-F' 'a-f' | grep -q "$CAMERA_MAC"; then
+		return 0
+	fi
+
+	# A station entry catches the camera immediately after it associates,
+	# before an ARP/neighbor entry has been created.
+	for iface in $(iw dev 2>/dev/null | awk '$1 == "Interface" {print $2}'); do
+		if iw dev "$iface" station dump 2>/dev/null | tr 'A-F' 'a-f' | grep -q "$CAMERA_MAC"; then
+			return 0
+		fi
+	done
+
+	return 1
+}
+
+CAMERA_MAC=$(echo "$CAMERA_MAC" | tr 'A-F' 'a-f')
+last_log=0
+while ! camera_visible; do
+	now=$(date +%s)
+	if [ $((now - last_log)) -ge 30 ]; then
+		log "camera $CAMERA_MAC not visible; waiting before starting bridge"
+		last_log=$now
+	fi
+	sleep 5
+done
+
+log "camera $CAMERA_MAC detected; starting RTSP bridge for $CAMERA_IP"
+exec "$BRIDGE" --ip "$CAMERA_IP" --rtsp-port "$RTSP_PORT"

@@ -1,0 +1,24 @@
+# IWFCam RTSP bridge
+
+The service starts automatically at boot, but waits until the configured
+camera MAC address is visible on the local Wi-Fi station or neighbor table.
+It does not require Internet access or cloud discovery.
+
+Configuration is in `/etc/config/iwfcam`:
+
+```sh
+uci set iwfcam.main.camera_ip='10.41.0.101'
+uci set iwfcam.main.camera_mac='c6:26:08:13:2e:23'
+uci commit iwfcam
+/etc/init.d/iwfcam restart
+```
+
+The default stream is:
+
+```text
+rtsp://<node-ip>:8554/cam
+```
+
+RTSP over TCP/interleaved transport is recommended for lossy long-range
+HaLow links. The bridge carries the camera's H.264 stream without requiring
+the camera to reach the Internet.

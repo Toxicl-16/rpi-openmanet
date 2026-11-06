@@ -1,31 +1,41 @@
-# OpenMANET Raspberry Pi 5 Safe Release
+# OpenMANET firmware v1.0.0
 
-This release is built from the public OpenMANET v0.5.2 baseline at commit
-`536b3f8078c9074df383b19e746103404d5296d2`.
+Version 1 is the first dual-board release of this corrected public firmware
+tree. It is built from the public OpenMANET v0.5.2 baseline and preserves the
+working Pi 3B+ and Pi 5 paths while packaging the tested IWFCam service for the
+Pi 3B+ image.
 
-## Included fixes
+## Release assets
 
-- Correct BATMAN-V `bat0` creation, mesh hard-interface binding, and bridge
-  membership for the Pi 5 OpenMANET mesh wizard.
-- Enable F2FS security xattrs and configure Docker's `vfs` storage driver to
-  avoid `lsetxattr security.capability: operation not supported` during layer
-  extraction.
-- Replace unintended white surfaces in the main OpenMANET portal theme. The
-  application on port 8080 is unchanged.
-- Document offline, manual SquashFS/F2FS overlay expansion from Linux or a
-  Linux VM on macOS. The firmware does not resize storage during boot.
+- Raspberry Pi 3B+ factory image
+- Raspberry Pi 3B+ sysupgrade image
+- Raspberry Pi 5 factory image
+- Raspberry Pi 5 sysupgrade image
+- Per-board manifests
+- `SHA256SUMS`
+- This release note and the manual SD-card expansion guide
 
-## Build and validation
+Use a factory image for a freshly flashed SD card. Use sysupgrade only for an
+existing compatible installation. The images do not resize partitions or
+filesystems automatically.
 
-- Pi 5 factory image SHA-256:
-  `d007884ee2514ab0c5cb597c8c147eacb94e0b6714b777722312b610e3320bbb`
-- Pi 5 sysupgrade image SHA-256:
-  `2bf7ecf30005d1137429bc5c843bdc876d61cc8a4ef8ffc1934f7df2a24468d9`
-- All repository source validation tests pass.
-- The complete Pi 5 image build succeeds, including the BATMAN-adv module,
-  `batctl`, Docker, `libcap`, `libcap-bin`, and the BATMAN repair service.
-- The Pi 3 profile configuration check succeeds and does not select the Pi 5
-  BATMAN repair package or Pi 5 F2FS options.
-- Hardware boot and runtime validation has not been performed; a Raspberry Pi
-  test device was not available in this build environment.
+## Included fixes and features
 
+- BATMAN-V `bat0` creation, hard-interface binding, and bridge membership.
+- Ethernet remains an independent DHCP uplink when the Pi 5 is used as a
+  gateway.
+- Docker uses F2FS-compatible `vfs` storage and capability support.
+- The main OpenMANET portal uses the maintained OpenMANET Dark theme. Port 8080
+  was not modified by this theme work.
+- Native GoLangTAKServer is included in the Pi 5 image; OpenTAKServer and its
+  Docker deployment are not included in this version.
+- The Pi 3B+ image includes the IWFCam H.264-to-RTSP bridge. Its procd service
+  waits for the configured camera MAC before starting at boot and requires no
+  camera Internet access.
+
+## Validation
+
+The build server ran the source checks, built both target profiles, inspected
+both manifests, and generated SHA-256 checksums. No Raspberry Pi hardware was
+booted by the build process; hardware boot, radio, Docker, TAK-client, and
+RTSP/EUD acceptance testing remain separate field tests.

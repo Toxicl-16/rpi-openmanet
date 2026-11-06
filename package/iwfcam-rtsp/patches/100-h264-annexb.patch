@@ -1,0 +1,161 @@
+--- a/main.go
++++ b/main.go
+@@ -1,10 +1,8 @@
+ package main
+ 
+ import (
+-	"bytes"
+ 	"encoding/binary"
+ 	"flag"
+-	"image/jpeg"
+ 	"log"
+ 	"net"
+ 	"sort"
+@@ -23,17 +21,6 @@
+ 	RtspPort = "8554"
+ )
+ 
+-func cleanJPEG(buf []byte) []byte {
+-	var out []byte
+-	for i := 0; i < len(buf); i++ {
+-		if buf[i] == 0xFF && i+1 < len(buf) && buf[i+1] == 0xFF {
+-			continue // skip duplicate FF padding
+-		}
+-		out = append(out, buf[i])
+-	}
+-	return out
+-}
+-
+ func getLocalIP(targetIP string) string {
+ 	conn, err := net.Dial("udp", targetIP+":1")
+ 	if err != nil {
+@@ -43,6 +30,47 @@
+ 	return conn.LocalAddr().(*net.UDPAddr).IP.String()
+ }
+ 
++// splitAnnexB converts the camera's H.264 byte stream into individual NALUs
++// for the RTP packetizer. It accepts both three- and four-byte start codes.
++func splitAnnexB(buf []byte) [][]byte {
++	var starts []int
++	for i := 0; i+3 <= len(buf); {
++		if i+4 <= len(buf) && buf[i] == 0 && buf[i+1] == 0 && buf[i+2] == 0 && buf[i+3] == 1 {
++			starts = append(starts, i)
++			i += 4
++			continue
++		}
++		if buf[i] == 0 && buf[i+1] == 0 && buf[i+2] == 1 {
++			starts = append(starts, i)
++			i += 3
++			continue
++		}
++		i++
++	}
++	if len(starts) == 0 {
++		if len(buf) > 0 {
++			return [][]byte{buf}
++		}
++		return nil
++	}
++
++	var nalus [][]byte
++	for i, start := range starts {
++		naluStart := start + 3
++		if start+4 <= len(buf) && buf[start+2] == 0 {
++			naluStart = start + 4
++		}
++		naluEnd := len(buf)
++		if i+1 < len(starts) {
++			naluEnd = starts[i+1]
++		}
++		if naluStart < naluEnd {
++			nalus = append(nalus, buf[naluStart:naluEnd])
++		}
++	}
++	return nalus
++}
++
+ type serverHandler struct {
+ 	stream *gortsplib.ServerStream
+ }
+@@ -95,7 +123,7 @@
+ 	}
+ 	defer server.Close()
+ 
+-	forma := &format.MJPEG{}
++	forma := &format.H264{PayloadTyp: 96, PacketizationMode: 1}
+ 	media := &description.Media{
+ 		Type:    description.MediaTypeVideo,
+ 		Formats: []format.Format{forma},
+@@ -110,7 +138,7 @@
+ 
+ 	encoder, err := forma.CreateEncoder()
+ 	if err != nil {
+-		log.Fatalf("Failed to create MJPEG RTP encoder: %v", err)
++		log.Fatalf("Failed to create H264 RTP encoder: %v", err)
+ 	}
+ 
+ 	rtpTime := &rtptime.Encoder{ClockRate: forma.ClockRate()}
+@@ -137,7 +165,7 @@
+ 	for {
+ 		log.Printf("Sending GET_UDP_INFO to %s:%d...", CamIP, CmdPort)
+ 		conn.WriteToUDP(getUDPInfo, camAddr)
+-		
++
+ 		conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+ 		buf := make([]byte, 4096)
+ 		n, remoteAddr, err := conn.ReadFromUDP(buf)
+@@ -181,7 +209,7 @@
+ 	packets := make(map[int][]byte)
+ 	buf := make([]byte, 65536)
+ 
+-	log.Println("Listening for MJPEG stream and forwarding to RTSP...")
++	log.Println("Listening for H264 stream and forwarding to RTSP...")
+ 
+ 	for {
+ 		n, _, err := conn.ReadFromUDP(buf)
+@@ -228,34 +256,26 @@
+ 					assembled = append(assembled, packets[k]...)
+ 				}
+ 
+-				if len(assembled) > 2 && assembled[0] == 0xFF && assembled[1] == 0xD8 {
+-					// The camera sends Type 0 (4:2:2) or padded MJPEG which breaks gortsplib
+-					// We transcode it to standard Type 1 (4:2:0) using Go's jpeg library
+-					img, err := jpeg.Decode(bytes.NewReader(assembled))
++				nalus := splitAnnexB(assembled)
++				if len(nalus) > 0 {
++					rtpPackets, err := encoder.Encode(nalus)
+ 					if err == nil {
+-						var outBuf bytes.Buffer
+-						err = jpeg.Encode(&outBuf, img, &jpeg.Options{Quality: 80})
+-						if err == nil {
+-							rtpPackets, err := encoder.Encode(outBuf.Bytes())
+-							if err == nil {
+-								ts := rtpTime.Encode(time.Since(startTime))
+-								for _, pkt := range rtpPackets {
+-									pkt.Timestamp = ts
+-									stream.WritePacketRTP(media, pkt)
+-								}
+-							} else {
+-								log.Printf("RTP Encoder error: %v", err)
+-							}
++						ts := rtpTime.Encode(time.Since(startTime))
++						for _, pkt := range rtpPackets {
++							pkt.Timestamp = ts
++							stream.WritePacketRTP(media, pkt)
+ 						}
++					} else {
++						log.Printf("RTP Encoder error: %v", err)
+ 					}
+ 				} else {
+-					log.Printf("Warning: Dropped corrupted frame %d, %d bytes", frameIndex, len(assembled))
++					log.Printf("Warning: Dropped empty H264 frame %d", frameIndex)
+ 				}
+ 			}
+ 			currentFrameIndex = frameIndex
+ 			packets = make(map[int][]byte)
+ 		}
+-		
++
+ 		packets[packetIndex] = payload
+ 	}
+ }

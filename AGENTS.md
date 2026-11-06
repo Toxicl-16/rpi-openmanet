@@ -4,7 +4,7 @@ High-level context for agents and contributors landing in this repo cold. For bu
 
 ## What this repo is
 
-A community OpenMANET/OpenWrt tree with an active Raspberry Pi 5 target and an archived Raspberry Pi 3B+ target reference. The active Pi 5 profile brings Morse Micro HaLow firmware to the Pi 5 and adds `openmanetd`, Docker, and an OpenTAKServer deployment. The official Morse Micro OpenWrt SDK ships on OpenWrt 23.05 / kernel 5.15 and only supports Pi 4 — Pi 5 needs OpenWrt 24.10's bcm2712/RP1 hardware definitions and kernel 6.6, which Morse hasn't shipped yet. This repo vendors those hardware definitions back into the 23.05 SDK so the existing Morse package set can build for Pi 5.
+A community OpenMANET/OpenWrt tree with Raspberry Pi 5 and Raspberry Pi 3B+ targets. Version 1 publishes both images. The Pi 5 profile brings Morse Micro HaLow firmware to the Pi 5 and adds `openmanetd`, BATMAN-V repair, OpenMANET Dark, and native GoLangTAKServer. The Pi 3B+ profile preserves the OpenMANET mesh path and adds the reproducible `iwfcam-rtsp` service. The official Morse Micro OpenWrt SDK ships on OpenWrt 23.05 / kernel 5.15 and only supports Pi 4 — Pi 5 needs OpenWrt 24.10's bcm2712/RP1 hardware definitions and kernel 6.6, which Morse hasn't shipped yet. This repo vendors those hardware definitions back into the 23.05 SDK so the existing Morse package set can build for Pi 5.
 
 The work is sometimes called a "kernel uplift backport": same Morse SDK userspace, target-wide kernel bump 5.15 → 6.6, mac80211 backports 6.1.110 → 6.12.61, plus net-new bcm2712 subtarget, RP1 patches, and Pi 5 device profile.
 
@@ -13,6 +13,7 @@ The work is sometimes called a "kernel uplift backport": same Morse SDK userspac
 | Path | What it is |
 |---|---|
 | `boards/ekh-bcm2712/target_diffconfig` | Pi 5 board config — single source of truth for what packages go in the image |
+| `boards/ekh-bcm2710/` | Raspberry Pi 3B+ image profile |
 | `boards/ekh-bcm2711/` | Pi 4 reference board, unmodified from Morse's SDK |
 | `target/linux/bcm27xx/bcm2712/` | New subtarget (config-6.6, default packages) |
 | `target/linux/bcm27xx/patches-6.6/` | Vendored from upstream openwrt-24.10 (~1300 patches) plus our additions |
@@ -26,7 +27,7 @@ The work is sometimes called a "kernel uplift backport": same Morse SDK userspac
 
 | Item | Value |
 |---|---|
-| Active branch | `main` |
+| Active release branch | `release-v1.0.0` |
 | Upstream base | `mm/v23.05.5` (Morse SDK 23.05.5) |
 | Kernel | 6.6.133 (vendored from openwrt-24.10) |
 | mac80211 backports | 6.12.61 |
@@ -39,6 +40,7 @@ Releases on this fork are tagged `vX.Y.Z[-alpha]` and built locally on the maint
 - A firmware source fix is not complete until a full firmware image is rebuilt from the corrected source. Do not deliver a standalone IPK as the fix.
 - Releases prioritize flashable firmware images: include the Raspberry Pi factory and sysupgrade images, checksums, and relevant documentation. Individual IPKs are optional supporting artifacts and must not replace the firmware images or become a separate package-only release.
 - When preparing an incremental release, start from the previous known-good release commit and add only the verified fix before rebuilding the complete image.
+- Changes to `iwfcam-rtsp`, BATMAN, networking, or boot services require both affected target images to be rebuilt. Do not publish a package-only workaround as the release.
 
 ## Hardware status
 

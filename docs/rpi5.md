@@ -1,106 +1,50 @@
-# Raspberry Pi 5 safe-release guide
+# Raspberry Pi 5 image
 
-This is the active target for the `v0.5.4-rpi5-safe` release. It is built from
-the public v0.5.2 baseline with the focused fixes described below.
-
-## Hardware scope
-
-- Raspberry Pi 5 (`bcm2712`), including Pi 500 where compatible
-- Morse Micro MM8108 USB HaLow module
-- Raspberry Pi 5 onboard BCM43455 Wi-Fi
-
-The MM6108 SPI path is not part of this release's verified hardware scope. No
-physical Pi 5 was available for boot or RF acceptance testing, so the release
-status is based on source validation and successful image compilation.
-
-## Image profile
+Version 1 includes a Raspberry Pi 5 (`bcm2712`) image for the Morse MM8108
+USB HaLow module. It also includes the Pi 5 onboard Wi-Fi support, OpenMANET
+portal, BATMAN-V repair service, and native GoLangTAKServer.
 
 The profile is [`boards/ekh-bcm2712/target_diffconfig`](../boards/ekh-bcm2712/target_diffconfig).
-The stable profile selects the Pi 5 6.6 kernel target, Morse HaLow support,
-the OpenMANET mesh wizard, BATMAN-adv, Docker, OpenTAKServer, and the
-OpenMANET Dark theme. The experimental native TAK branch replaces the Docker
-deployment; see [EXPERIMENTAL_NATIVE_TAK.md](EXPERIMENTAL_NATIVE_TAK.md).
+The image uses a 64 MiB FAT boot partition and a 4 GiB SquashFS/F2FS root
+layout. The firmware never resizes partitions or filesystems during boot.
 
-The image uses a 64 MiB FAT boot partition and a 4 GiB SquashFS/root partition.
-The writable F2FS overlay and Docker data live in the root partition. The
-firmware never resizes partitions or filesystems during boot.
+## Important fixes
 
-## Fixes in this release
+- BATMAN-V creates `bat0`, binds the enabled 802.11s interface through a
+  `batadv_hardif`, and bridges only `bat0` into the HaLow-side bridge.
+- Docker uses the F2FS-compatible `vfs` storage driver and includes the
+  capability packages needed to avoid `lsetxattr security.capability:
+  operation not supported`.
+- The main OpenMANET portal has the OpenMANET Dark theme. Port 8080 was not
+  modified by the theme work.
+- GoLangTAKServer runs natively under procd; it does not require Docker or
+  OpenTAKServer.
 
-### BATMAN-V topology
+## First boot
 
-At boot, the Pi 5 profile discovers enabled 802.11s wireless interfaces and
-configures each as a `batadv_hardif` attached to `bat0` using `BATMAN_V`. The
-HaLow-side bridge receives `bat0`; the physical mesh interface is not bridged
-directly, and the Ethernet uplink is not moved into that bridge.
+Flash the `*-rpi-5-squashfs-factory.img.gz` asset, connect directly to
+Ethernet, open LuCI at `http://10.41.254.1`, set the root password, and run
+**Wizards → 802.11s Mesh**. Select Mesh Gate or Mesh Point as appropriate.
 
-The repair service is installed as:
-
-```text
-/etc/init.d/openmanet-batman
-/usr/sbin/openmanet-batman
-```
-
-The OpenMANET mesh wizard remains the source of the mesh role and wireless
-settings.
-
-### Docker on the F2FS overlay
-
-The profile enables F2FS security xattrs, includes `libcap` and `libcap-bin`,
-and configures Docker with:
-
-```text
-storage driver: vfs
-data root: /opt/docker/
-```
-
-This avoids the `lsetxattr security.capability: operation not supported` error
-from extracting Docker layers through `overlay2` on this storage layout.
-
-On a booted device, check the result with:
+Verify the BATMAN chain after setup:
 
 ```sh
-docker info --format '{{.Driver}} {{.DockerRootDir}}'
-getcap /usr/bin/ping
-cp /bin/true /tmp/openmanet-capability-test
-setcap cap_net_raw+ep /tmp/openmanet-capability-test
-getcap /tmp/openmanet-capability-test
-rm -f /tmp/openmanet-capability-test
+ip link show bat0
+batctl meshif bat0 if
+uci show network.bat0 network.batmesh
+bridge link show master br-ahwlan
 ```
 
-### Portal theme
+The physical HaLow interface should be a BATMAN hard interface, not a direct
+member of `br-ahwlan`; `bat0` should be the bridge member. Ethernet remains an
+independent uplink when configured as the gateway.
 
-The main OpenMANET portal cards, detail panels, device box, and graph nodes use
-dark surfaces and readable borders. The application on port 8080 was not
-modified.
+## Native TAK
 
-## Flashing and first boot
+GoLangTAKServer is managed by `/etc/init.d/golangtakserver`. Its setup and
+client ports are documented in [EXPERIMENTAL_NATIVE_TAK.md](EXPERIMENTAL_NATIVE_TAK.md).
 
-Flash the `*-factory.img.gz` asset from the
-[release page](https://github.com/Toxicl-16/rpi-openmanet/releases/tag/v0.5.4-rpi5-safe)
-to the SD card. Connect directly to Ethernet and use:
-
-```text
-LuCI: http://10.41.254.1
-SSH:  root@10.41.254.1
-```
-
-Set a root password, then open **Wizards → 802.11s Mesh** and select Mesh Gate
-or Mesh Point. OpenTAKServer starts after Docker and pulls its ARM64 images on
-first deployment. Its web UI uses port 8090; port 8080 is outside this release's
-changes.
-
-## Manual SD-card expansion
-
-Do not resize the card while the Pi is running. Follow
-[SD_CARD_RESIZE.md](SD_CARD_RESIZE.md) from native Linux or a Kali/Ubuntu Linux
-VM on macOS. The procedure backs up the full card, preserves partition 2's
-start, calculates the SquashFS boundary with `unsquashfs -s`, and grows the
-F2FS overlay offline.
-
-## Rebuild and validate
-
-From the repository root after installing the pinned feeds:
+## Build and validation
 
 ```sh
 ./scripts/feeds update -a
@@ -110,13 +54,6 @@ From the repository root after installing the pinned feeds:
 CONFIG_ALFRED_GPSD=n make -j"$(nproc)" V=s
 ```
 
-Run the source checks with:
-
-```sh
-git diff --check
-for test in scripts/tests/test-*.sh; do "$test"; done
-```
-
-The published image compiled successfully and includes the BATMAN-adv module,
-`batctl`, Docker, `libcap`, `libcap-bin`, and `openmanet-batman-fix`. Hardware
-boot and runtime behavior remain unverified in this environment.
+Run `git diff --check` and every `scripts/tests/test-*.sh` script. This
+validates source and image generation; it does not replace physical boot,
+radio, Docker, or TAK-client testing.

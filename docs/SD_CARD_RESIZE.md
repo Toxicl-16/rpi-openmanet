@@ -1,7 +1,8 @@
 # Expand an OpenMANET SD card to full capacity
 
 This guide expands a freshly flashed OpenMANET Raspberry Pi image to use the
-full SD card. It applies to the Raspberry Pi 5 safe release and similar
+full SD card. It applies to the Version 1 Raspberry Pi 3B+ and Raspberry Pi 5
+releases and similar
 OpenMANET images that use a read-only SquashFS root with a writable F2FS
 overlay.
 
@@ -41,8 +42,8 @@ Read these before running any command:
 ## 1. Flash the image
 
 Download the factory image from the
-[OpenMANET release page](https://github.com/Toxicl-16/rpi-openmanet/releases/tag/v0.5.3-rpi5-safe)
-and verify its checksum using the accompanying rpi5-sha256sums.txt file.
+[OpenMANET release page](https://github.com/Toxicl-16/rpi-openmanet/releases/tag/v1.0.0)
+and verify its checksum using the accompanying `SHA256SUMS` release asset.
 
 ### macOS
 

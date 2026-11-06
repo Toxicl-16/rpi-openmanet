@@ -1,0 +1,61 @@
+CONFIG_TARGET_bcm27xx=y
+CONFIG_TARGET_bcm27xx_bcm2710=y
+CONFIG_TARGET_bcm27xx_bcm2710_DEVICE_rpi-3=y
+
+# OpenMANET first-boot LAN addressing.
+CONFIG_IMAGEOPT=y
+CONFIG_PREINITOPT=y
+CONFIG_TARGET_PREINIT_IP="10.41.254.1"
+CONFIG_TARGET_PREINIT_NETMASK="255.255.255.0"
+CONFIG_TARGET_PREINIT_BROADCAST="10.41.254.255"
+CONFIG_TARGET_DEFAULT_LAN_IP_FROM_PREINIT=y
+
+# Leave room for LuCI, OpenMANETd, and the IWFCam service.
+CONFIG_TARGET_KERNEL_PARTSIZE=64
+CONFIG_TARGET_ROOTFS_PARTSIZE=4096
+
+# Morse Micro MM8108 USB HaLow radio.
+CONFIG_PACKAGE_kmod-morse=y
+CONFIG_PACKAGE_netifd-morse=y
+CONFIG_PACKAGE_morsecli=y
+CONFIG_PACKAGE_morse-fw-6108=y
+CONFIG_PACKAGE_morse-fw-8108=y
+CONFIG_PACKAGE_morse-board-config=y
+CONFIG_PACKAGE_morse-regdb=y
+
+# Pi 3 onboard Wi-Fi and the 64-bit Raspberry Pi 3 image.
+CONFIG_PACKAGE_kmod-brcmfmac=y
+CONFIG_PACKAGE_cypress-firmware-43430-sdio=y
+CONFIG_PACKAGE_brcmfmac-nvram-43430-sdio=y
+CONFIG_PACKAGE_wpad-basic-mbedtls=y
+
+# BATMAN-adv mesh and 802.11s workflow.
+CONFIG_PACKAGE_kmod-batman-adv=y
+CONFIG_PACKAGE_batctl=y
+CONFIG_PACKAGE_luci-proto-batman-adv=y
+CONFIG_PACKAGE_morse_mesh11sd=y
+CONFIG_PACKAGE_iw-full=y
+CONFIG_PACKAGE_hostapd_s1g=y
+CONFIG_PACKAGE_wpa_supplicant_s1g=y
+CONFIG_PACKAGE_morse-bundle=y
+CONFIG_PACKAGE_morse-mode=y
+CONFIG_PACKAGE_wizard-config=y
+CONFIG_PACKAGE_luci-acl-umdns=y
+CONFIG_PACKAGE_umdns=y
+
+# OpenMANET portal and manager.
+CONFIG_PACKAGE_luci=y
+CONFIG_PACKAGE_luci-app-morseconfig=y
+CONFIG_PACKAGE_luci-app-ekhwizards=y
+CONFIG_PACKAGE_luci-app-morseguide=y
+CONFIG_PACKAGE_luci-app-morseupgrade=y
+CONFIG_PACKAGE_luci-lib-morseui=y
+CONFIG_PACKAGE_luci-mod-home=y
+CONFIG_PACKAGE_luci-theme-openmanetargon=y
+CONFIG_PACKAGE_openmanetd=y
+
+# IWFCam H.264-to-RTSP bridge; starts after the configured camera MAC appears.
+CONFIG_PACKAGE_iwfcam-rtsp=y
+
+# Pi 3 EEPROM/persistent-variable support used by the wizard.
+CONFIG_PACKAGE_persistent-vars-storage-bcm2711=y
