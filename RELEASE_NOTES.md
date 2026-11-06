@@ -7,13 +7,22 @@ Pi 3B+ image.
 
 ## Release assets
 
-- Raspberry Pi 3B+ factory image
-- Raspberry Pi 3B+ sysupgrade image
-- Raspberry Pi 5 factory image
-- Raspberry Pi 5 sysupgrade image
+- `pi3/openwrt-23.05.5-morse-2.9-dev-bcm27xx-bcm2710-rpi-3-squashfs-factory.img.gz` — 37,605,445 bytes
+- `pi3/openwrt-23.05.5-morse-2.9-dev-bcm27xx-bcm2710-rpi-3-squashfs-sysupgrade.img.gz` — 37,606,427 bytes
+- `pi5/openwrt-23.05.5-morse-2.9-dev-bcm27xx-bcm2712-rpi-5-squashfs-factory.img.gz` — 36,288,444 bytes
+- `pi5/openwrt-23.05.5-morse-2.9-dev-bcm27xx-bcm2712-rpi-5-squashfs-sysupgrade.img.gz` — 36,289,290 bytes
 - Per-board manifests
 - `SHA256SUMS`
 - This release note and the manual SD-card expansion guide
+
+The image SHA-256 values are:
+
+| Board/image | SHA-256 |
+| --- | --- |
+| Pi 3B+ factory | `34bfa2f2cdb0fae69d534f2a5672d1fb24add9216931073557b9a400ebc42271` |
+| Pi 3B+ sysupgrade | `6ccb45fd682744a5307279c7e6174713f035a86ebd33a06f7f1ae4023d4c6ac6` |
+| Pi 5 factory | `6a35831ba7960ca7c85ca7502d402cfd22c051a013be70808f59be05436d4e0e` |
+| Pi 5 sysupgrade | `8a82585847daa01f8d5c00087edf41f672facfee079154ee0018b38779afdb2f` |
 
 Use a factory image for a freshly flashed SD card. Use sysupgrade only for an
 existing compatible installation. The images do not resize partitions or
