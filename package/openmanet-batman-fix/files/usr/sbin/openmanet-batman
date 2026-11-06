@@ -16,6 +16,8 @@ mesh_iface_sections=""
 mesh_ifnames=""
 ahwlan_bridge=""
 gateway=0
+eth0_on_lan=0
+lan_device=""
 
 log_msg() {
 	logger -t openmanet-batman "$*" 2>/dev/null || true
@@ -91,6 +93,33 @@ uci_del_list_if_present() {
 	esac
 }
 
+mark_lan_eth0() {
+	[ "$1" = eth0 ] && eth0_on_lan=1
+}
+
+find_lan_eth0() {
+	local section type name
+	config_get type "$section" type
+	config_get name "$section" name
+	[ "$type" = bridge ] || return 0
+	[ "$name" = "$lan_device" ] || return 0
+	config_list_foreach "$section" ports mark_lan_eth0
+}
+
+detect_lan_eth0() {
+	local lan_ifname lan_ports
+	lan_device="$(uci -q get network.lan.device 2>/dev/null || true)"
+	lan_ifname="$(uci -q get network.lan.ifname 2>/dev/null || true)"
+	lan_ports="$(uci -q get network.lan.ports 2>/dev/null || true)"
+
+	[ "$lan_device" = eth0 ] && eth0_on_lan=1
+	[ "$lan_ifname" = eth0 ] && eth0_on_lan=1
+	case " $lan_ports " in
+		*" eth0 "*) eth0_on_lan=1 ;;
+	esac
+	config_foreach find_lan_eth0 device
+}
+
 ensure_bridge_port() {
 	local section="$1" port
 	[ -n "$section" ] || return 0
@@ -136,6 +165,7 @@ repair() {
 
 	mesh_iface_sections=""
 	mesh_ifnames=""
+	eth0_on_lan=0
 	config_load wireless
 	config_foreach find_mesh_iface wifi-iface
 	[ -n "$mesh_iface_sections" ] || {
@@ -190,6 +220,7 @@ repair() {
 	ahwlan_bridge=""
 	config_load network
 	config_foreach find_ahwlan_bridge device
+	detect_lan_eth0
 	if [ -z "$ahwlan_bridge" ] && uci -q get network.ahwlan >/dev/null 2>&1; then
 		ahwlan_bridge='ahwlan_dev'
 		uci_set_type network "$ahwlan_bridge" device
@@ -203,13 +234,24 @@ repair() {
 	uci_set_option mesh11sd mesh_params mesh_fwding 0
 	uci_set_option mesh11sd mesh_params mesh_nolearn 1
 
-	# The gate's Ethernet is an independent DHCP uplink, not a port of the
-	# HaLow bridge. Preserve the existing firewall rules on wan while making
-	# the physical attachment explicit.
-	if [ "$gateway" -eq 1 ]; then
+	# A gateway normally uses eth0 as an independent DHCP uplink, not as a
+	# port of the HaLow bridge. Respect an explicit LuCI assignment of eth0 to
+	# LAN, however: it must not remain attached to WAN after Save & Apply.
+	wan_device="$(uci -q get network.wan.device 2>/dev/null || true)"
+	wan_ifname="$(uci -q get network.wan.ifname 2>/dev/null || true)"
+	if [ "$eth0_on_lan" -eq 1 ] && {
+		[ "$wan_device" = eth0 ] || [ "$wan_ifname" = eth0 ]
+	}; then
+		uci_delete_option network wan device
+		uci_delete_option network wan ifname
+		uci_set_option network wan disabled 1
+	elif [ "$gateway" -eq 1 ]; then
+		# Preserve the existing firewall rules on wan while making the
+		# physical attachment explicit.
 		uci_set_type network wan interface
 		uci_set_option network wan proto dhcp
 		uci_set_option network wan device eth0
+		uci_delete_option network wan disabled
 	fi
 
 	if [ "$changed" -eq 1 ]; then

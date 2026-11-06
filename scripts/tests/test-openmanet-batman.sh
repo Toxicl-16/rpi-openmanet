@@ -18,6 +18,9 @@ grep -F '/etc/init.d/alfred restart' "$script" >/dev/null
 grep -F 'uci_delete_option network bat0 disabled' "$script" >/dev/null
 grep -F 'mesh_nolearn 1' "$script" >/dev/null
 grep -F 'network wan device eth0' "$script" >/dev/null
+grep -F 'detect_lan_eth0' "$script" >/dev/null
+grep -F 'uci_set_option network wan disabled 1' "$script" >/dev/null
+grep -F 'uci_delete_option network wan ifname' "$script" >/dev/null
 grep -F '. /lib/functions.sh' "$script" >/dev/null
 ! grep -E '^set -u$' "$script" >/dev/null
 grep -F 'procd_add_reload_trigger network wireless mesh11sd' "$repo/package/openmanet-batman-fix/files/etc/init.d/openmanet-batman" >/dev/null
