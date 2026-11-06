@@ -10,10 +10,22 @@ read or copied. Complete the wizard with a non-empty password before using
 the TAK dashboard.
 
 The secure TAK listener is TLS 8089. The dashboard and enrollment endpoints use
-HTTPS 8443 and 8446. Plain TCP, UDP, and HTTP are disabled in the default
-profile. Port 8080 is intentionally unused by this service. Create client
-connection packages or QR codes from the dashboard.
+HTTPS 8443 and 8446. For devices that cannot use the self-signed HTTPS/TLS
+profile, the image also enables plain HTTP on 8088 and plain TAK TCP on 8087.
+Those two listeners are unencrypted and must only be used on a trusted LAN or
+MANET. The dashboard's iTAK section provides separate secure and plain-TCP QR
+codes. Port 8080 remains reserved for the main OpenMANETd portal.
+
+To change the GoLangTAK map, open the TAK dashboard, go to **Settings** →
+**General**, and edit **Map tiles**. Use a tile URL containing `{z}`, `{x}`,
+and `{y}`, for example
+`https://tile.openstreetmap.org/{z}/{x}/{y}.png` when the node has Internet
+access. For an offline MANET, use the URL of a tile server reachable from the
+node. This changes the GoLangTAK map only; it does not change the OpenMANETd
+portal on port 8080.
 
 The packaged binary is GolangTAKServer 1.6.3 for Linux ARM64, built from the
-upstream `golangtakserver-v1.6.3` source with the OpenMANET QR layout fix. Its
-upstream license is installed at /opt/golangtakserver/LICENSE.
+upstream GoLangTAKServer source at commit
+`57543215f44e90a65ae50c742f5b6580404409fd` with the OpenMANET plain-TCP QR
+changes recorded in `package/golangtakserver/patches/100-plain-tcp-qr.patch`.
+Its upstream license is installed at /opt/golangtakserver/LICENSE.

@@ -21,6 +21,10 @@ sync_admin_account() {
 		# until its data store is ready, then replace that account with the root
 		# credentials entered in the OpenMANET password wizard. Never discard the
 		# temporary password until the account update has succeeded.
+		log_msg() {
+			logger -t golangtakserver -- "$*"
+		}
+
 		synced=0
 		i=0
 		while [ "$i" -lt 30 ]; do
@@ -32,9 +36,16 @@ sync_admin_account() {
 			i=$((i + 1))
 			sleep 1
 		done
-		[ "$synced" = 1 ] || exit 0
+		if [ "$synced" != 1 ]; then
+			log_msg "could not synchronize the OpenMANET root password; will retry at the next service restart"
+			exit 0
+		fi
 
-		"$SERVER" user del admin --data "$DATA_ROOT" >/dev/null 2>&1 || true
+		if "$SERVER" user del admin --data "$DATA_ROOT" >/dev/null 2>&1; then
+			log_msg "native TAK administrator is the OpenMANET root account"
+		else
+			log_msg "root password synchronized; the temporary TAK admin account could not be removed"
+		fi
 
 		# Do not leave the system password in a persistent plaintext UCI file.
 		uci -q delete golangtakserver.main.admin_password

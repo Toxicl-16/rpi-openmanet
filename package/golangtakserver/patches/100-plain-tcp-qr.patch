@@ -1,0 +1,93 @@
+diff --git a/GolangTAKServer/cmd/golangtakserver/manage.go b/GolangTAKServer/cmd/golangtakserver/manage.go
+index f296e25..3a60285 100644
+--- a/GolangTAKServer/cmd/golangtakserver/manage.go
++++ b/GolangTAKServer/cmd/golangtakserver/manage.go
+@@ -352,8 +352,8 @@ func cmdConnect(a *args) error {
+ 		if ci.Ports.TLS > 0 {
+ 			row("SSL", ci.TLS+"   (ATAK, WinTAK, iTAK, TAK Aware with certificates)")
+ 		}
+-		if ci.Ports.TCP > 0 && ci.Anon {
+-			row("TCP", ci.TCP+"   (unencrypted)")
++		if ci.Ports.TCP > 0 || ci.Ports.TCPAlt > 0 {
++			row("TCP", ci.TCP+"   (unencrypted; sign in with a user name and password)")
+ 		}
+ 		if ci.Ports.Enroll > 0 {
+ 			row("Enrollment", ci.Enroll+"   (sign in with a user name and password to get a certificate)")
+@@ -368,6 +368,10 @@ func cmdConnect(a *args) error {
+ 		}
+ 		fmt.Printf("\n  iTAK quick connect:\n\n")
+ 		printQR(os.Stdout, ci.ITAK)
++		if ci.Ports.TCP > 0 || ci.Ports.TCPAlt > 0 {
++			fmt.Printf("\n  iTAK plain TCP (trusted networks only):\n\n")
++			printQR(os.Stdout, ci.ITAKTCP)
++		}
+ 		fmt.Println("\n  For an ATAK enrollment QR code run: golangtakserver qr USER")
+ 		return nil
+ 	})
+@@ -388,6 +392,10 @@ func cmdQR(a *args) error {
+ 		}
+ 		fmt.Printf("\n  iTAK quick connect for %s:\n\n", ci.Host)
+ 		printQR(os.Stdout, ci.ITAK)
++		if ci.Ports.TCP > 0 || ci.Ports.TCPAlt > 0 {
++			fmt.Printf("\n  iTAK plain TCP (trusted networks only):\n\n")
++			printQR(os.Stdout, ci.ITAKTCP)
++		}
+ 		fmt.Println("\n  For an ATAK enrollment QR code for a user run: golangtakserver qr USER")
+ 		return nil
+ 	})
+diff --git a/GolangTAKServer/cmd/golangtakserver/run.go b/GolangTAKServer/cmd/golangtakserver/run.go
+index 6c53e4c..24b3727 100644
+--- a/GolangTAKServer/cmd/golangtakserver/run.go
++++ b/GolangTAKServer/cmd/golangtakserver/run.go
+@@ -156,6 +156,10 @@ func printBanner(s *server.Server, user, pw string, created bool) {
+ 	printConnection(w, cfg, user, pw, s.DataDir)
+ 	fmt.Fprintf(w, "\n  iTAK quick connect (scan with iTAK, then sign in):\n\n")
+ 	printQR(w, s.ITAKString(cfg.Address, false))
++	if cfg.Ports.TCP > 0 || cfg.Ports.TCPAlt > 0 {
++		fmt.Fprintf(w, "\n  iTAK plain TCP (trusted networks only):\n\n")
++		printQR(w, s.ITAKString(cfg.Address, true))
++	}
+ 	fmt.Fprintln(w)
+ }
+ 
+@@ -181,8 +185,16 @@ func printConnection(w io.Writer, cfg server.Config, user, pw, dir string) {
+ 	if cfg.Ports.TLS > 0 {
+ 		row("TAK (SSL)", fmt.Sprintf("%s:%d  - ATAK, WinTAK, iTAK: sign in with a user name and password, or scan a QR code from the dashboard", cfg.Address, cfg.Ports.TLS))
+ 	}
+-	if cfg.Ports.TCP > 0 && cfg.AllowAnonymous {
+-		row("TAK (TCP)", fmt.Sprintf("%s:%d  - unencrypted, for trusted networks and simple clients", cfg.Address, cfg.Ports.TCP))
++	if cfg.Ports.TCP > 0 || cfg.Ports.TCPAlt > 0 {
++		port := cfg.Ports.TCP
++		if port == 0 {
++			port = cfg.Ports.TCPAlt
++		}
++		auth := "sign in with a user name and password"
++		if cfg.AllowAnonymous {
++			auth = "anonymous or authenticated clients"
++		}
++		row("TAK (TCP)", fmt.Sprintf("%s:%d  - unencrypted, trusted networks only; %s", cfg.Address, port, auth))
+ 	}
+ 	row("Data", dir)
+ }
+diff --git a/GolangTAKServer/web/static/app.js b/GolangTAKServer/web/static/app.js
+index f795cbc..8b4ea10 100644
+--- a/GolangTAKServer/web/static/app.js
++++ b/GolangTAKServer/web/static/app.js
+@@ -2645,6 +2645,7 @@
+       const user = S.me.admin ? userSel.value : S.me.user;
+       const tls = info.ports.tls, tcp = info.ports.tcp || info.ports.tcpAlt;
+       const itak = (info.name || "GolangTAKServer").replace(/,/g, " ") + "," + host + "," + tls + ",SSL";
++      const itakTcp = info.itakTcp;
+       clear(body);
+       const enrollBox = h("div", { class: "qr" }, h("h3", null, "ATAK and WinTAK enrollment"), h("p", { class: "muted small" }, "Creates a one-time code for " + user + ". In ATAK: Settings, Network, Servers, Add, Scan QR."));
+       const enrollOut = h("div");
+@@ -2684,7 +2685,8 @@
+           "div",
+           { class: "qr-grid" },
+           enrollBox,
+-          h("div", { class: "qr" }, h("h3", null, "iTAK quick connect"), h("p", { class: "muted small" }, "In iTAK: Settings, Network, Servers, Connect with QR. iTAK then asks for a user name and password."), qrImg(itak), h("div", { class: "mono small" }, itak)),
++          h("div", { class: "qr" }, h("h3", null, "iTAK secure connect"), h("p", { class: "muted small" }, "In iTAK: Settings, Network, Servers, Connect with QR. iTAK then asks for a user name and password."), qrImg(itak), h("div", { class: "mono small break" }, itak)),
++          tcp ? h("div", { class: "qr" }, h("h3", null, "iTAK plain TCP"), h("p", { class: "muted small" }, "Use this only on a trusted LAN or MANET. Traffic is not encrypted; iTAK will ask for the same user name and password."), qrImg(itakTcp), h("div", { class: "mono small break" }, itakTcp)) : null,
+           linkBox
+         )
+       );
