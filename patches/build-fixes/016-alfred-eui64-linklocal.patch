@@ -1,7 +1,7 @@
-diff --git a/feeds/openmanet/routing/alfred/files/alfred.init b/feeds/openmanet/routing/alfred/files/alfred.init
+diff --git a/feeds/routing/alfred/files/alfred.init b/feeds/routing/alfred/files/alfred.init
 index 8baf978..73614b2 100644
---- a/feeds/openmanet/routing/alfred/files/alfred.init
-+++ b/feeds/openmanet/routing/alfred/files/alfred.init
+--- a/feeds/routing/alfred/files/alfred.init
++++ b/feeds/routing/alfred/files/alfred.init
 @@ -15,9 +15,40 @@ vis_enable=0
  
  append_interface()
