@@ -11,6 +11,10 @@ grep -F 'uci_set_option network bat0 routing_algo BATMAN_V' "$script" >/dev/null
 grep -F 'uci_set_option network "$hardif" proto batadv_hardif' "$script" >/dev/null
 grep -F 'uci_set_option network "$hardif" master bat0' "$script" >/dev/null
 grep -F 'uci_add_list_if_missing network "$section" ports bat0' "$script" >/dev/null
+grep -F 'ensure_alfred_config' "$script" >/dev/null
+grep -F 'uci_set_option alfred alfred disabled 0' "$script" >/dev/null
+grep -F 'uci commit alfred' "$script" >/dev/null
+grep -F '/etc/init.d/alfred restart' "$script" >/dev/null
 grep -F 'uci_delete_option network bat0 disabled' "$script" >/dev/null
 grep -F 'mesh_nolearn 1' "$script" >/dev/null
 grep -F 'network wan device eth0' "$script" >/dev/null

@@ -1,0 +1,15 @@
+diff --git a/feeds/routing/alfred/files/alfred.config b/feeds/routing/alfred/files/alfred.config
+index 9b79f57..d2b6df1 100644
+--- a/feeds/routing/alfred/files/alfred.config
++++ b/feeds/routing/alfred/files/alfred.config
+@@ -1,8 +1,7 @@
+ config 'alfred' 'alfred'
+-	list interface 'br-lan'
++	list interface 'br-ahwlan'
+ 	option mode 'master'
+ 	option batmanif 'bat0'
+ 	option start_vis '1'
+ 	option run_facters '1'
+-# REMOVE THIS LINE TO ENABLE ALFRED
+-	option disabled '1'
++	option disabled '0'

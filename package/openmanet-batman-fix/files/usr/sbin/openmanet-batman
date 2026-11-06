@@ -108,6 +108,27 @@ ensure_bridge_port() {
 	uci_add_list_if_missing network "$section" ports bat0
 }
 
+ensure_alfred_config() {
+	local bridge_name current
+	[ -n "$ahwlan_bridge" ] || return 0
+
+	bridge_name="$(uci -q get "network.$ahwlan_bridge.name" 2>/dev/null || true)"
+	[ -n "$bridge_name" ] || return 0
+
+	uci_set_type alfred alfred alfred
+	current="$(uci -q get alfred.alfred.interface 2>/dev/null || true)"
+	if [ "$current" != "$bridge_name" ]; then
+		uci -q delete alfred.alfred.interface
+		uci add_list alfred.alfred.interface="$bridge_name"
+		changed=1
+	fi
+	uci_set_option alfred alfred mode master
+	uci_set_option alfred alfred batmanif bat0
+	uci_set_option alfred alfred start_vis 1
+	uci_set_option alfred alfred run_facters 1
+	uci_set_option alfred alfred disabled 0
+}
+
 repair() {
 	local iface index hardif gate mode
 	mode="${1:-start}"
@@ -177,6 +198,7 @@ repair() {
 	fi
 	[ -n "$ahwlan_bridge" ] && uci_set_option network ahwlan device br-ahwlan
 	ensure_bridge_port "$ahwlan_bridge"
+	ensure_alfred_config
 
 	uci_set_option mesh11sd mesh_params mesh_fwding 0
 	uci_set_option mesh11sd mesh_params mesh_nolearn 1
@@ -194,6 +216,8 @@ repair() {
 		uci commit network
 		uci commit wireless
 		uci commit mesh11sd 2>/dev/null || true
+		uci commit alfred 2>/dev/null || true
+		/etc/init.d/alfred restart >/dev/null 2>&1 || true
 		if [ "$mode" = reload ]; then
 			ubus call network reload >/dev/null 2>&1 || true
 			/sbin/wifi reload >/dev/null 2>&1 || true
