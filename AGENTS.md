@@ -34,6 +34,12 @@ The work is sometimes called a "kernel uplift backport": same Morse SDK userspac
 
 Releases on this fork are tagged `vX.Y.Z[-alpha]` and built locally on the maintainer's host (no CI yet). Image artifacts are uploaded to the GitHub release page; the repo itself does not check in build outputs.
 
+### Firmware fix and release policy
+
+- A firmware source fix is not complete until a full firmware image is rebuilt from the corrected source. Do not deliver a standalone IPK as the fix.
+- Releases prioritize flashable firmware images: include the Raspberry Pi factory and sysupgrade images, checksums, and relevant documentation. Individual IPKs are optional supporting artifacts and must not replace the firmware images or become a separate package-only release.
+- When preparing an incremental release, start from the previous known-good release commit and add only the verified fix before rebuilding the complete image.
+
 ## Hardware status
 
 | Device | Chip | Bus | Status |
