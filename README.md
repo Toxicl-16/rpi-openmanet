@@ -6,10 +6,10 @@ Raspberry Pi 5 (`bcm2712`) with a Morse Micro MM8108 USB HaLow radio.
 
 ## Current release
 
-Download the pre-built images and packages from
-[v0.5.4-rpi5-safe](https://github.com/Toxicl-16/rpi-openmanet/releases/tag/v0.5.4-rpi5-safe).
-The release includes factory and sysupgrade images, checksums, the image
-manifest, build metadata, and all generated OpenWrt packages.
+Download the pre-built firmware from
+[v0.5.14](https://github.com/Toxicl-16/rpi-openmanet/releases/tag/v0.5.14).
+The release prioritizes the factory and sysupgrade images, checksums, the
+image manifest, and the SD-card expansion guide.
 
 The published firmware is a Pi 5 SquashFS/F2FS image. It does not resize the
 SD card during boot. Follow the beginner-friendly [SD-card resize guide](docs/SD_CARD_RESIZE.md)
@@ -24,7 +24,9 @@ needed.
   capability packages needed to avoid
   `lsetxattr security.capability: operation not supported`.
 - The main OpenMANET portal uses dark surfaces instead of unintended white
-  cards and backgrounds. The application on port 8080 is unchanged.
+  cards and backgrounds.
+- GoLangTAKServer no longer conflicts with OpenMANETd: plain TAK TCP uses
+  port 8092, while OpenMANETd retains its API on port 8087.
 - Storage expansion is documented as an offline manual operation; there is no
   automatic or dynamic resize service in the firmware.
 
@@ -35,22 +37,19 @@ The stable Pi 5 image includes:
 - Morse MM8108 USB driver and firmware, 802.11s mesh support, and the OpenMANET
   mesh wizard
 - BATMAN-adv, `batctl`, `openmanetd`, and the OpenMANET Dark LuCI theme
-- Docker, Compose, containerd, runc, and the OpenTAKServer deployment package
+- Native ARM64 GoLangTAKServer for TAK clients
 - Raspberry Pi 5 onboard Wi-Fi support
 
-OpenTAKServer container images are pulled on first start, so initial deployment
-requires Internet access unless an offline image bundle is supplied. Its web
-UI is served on port 8090; this firmware does not modify the separate port 8080
-application.
+The main OpenMANET portal is served by OpenMANETd on port 8080 (HTTP) and
+8081 (HTTPS). Its API uses port 8087. GoLangTAKServer uses secure TAK TCP on
+8089, plain TAK TCP on 8092, its dashboard on 8443, and enrollment on 8446.
 
-## Experimental native TAK branch
+## TAK service
 
-The [`experimental-native-tak`](https://github.com/Toxicl-16/rpi-openmanet/tree/experimental-native-tak)
-branch replaces OpenTAKServer and Docker with a native ARM64
+The firmware includes a native ARM64
 [GolangTAKServer](https://github.com/grangedevgroup-code/TAK-Backend) service.
-It is intended for Pi 5 testing only and is not a replacement for the stable
-release until ATAK/iTAK connectivity has been verified on hardware. See the
-[experimental native TAK guide](docs/EXPERIMENTAL_NATIVE_TAK.md).
+See the [native TAK guide](docs/EXPERIMENTAL_NATIVE_TAK.md) for setup and
+client connection details.
 
 The Raspberry Pi 3B+ target remains in the source tree as a compatibility
 reference. This release publishes Pi 5 images only and does not replace the
@@ -61,7 +60,8 @@ Pi 3B+ configuration.
 1. Flash the `*-factory.img.gz` release asset with Raspberry Pi Imager or an
    equivalent raw-image tool.
 2. Connect directly to the Pi 5 Ethernet port.
-3. Open LuCI at [http://10.41.254.1](http://10.41.254.1), or SSH to
+3. Open LuCI at [http://10.41.254.1](http://10.41.254.1), the OpenMANET portal
+   at [http://10.41.254.1:8080](http://10.41.254.1:8080), or SSH to
    `root@10.41.254.1`.
 4. Set a root password immediately, then open **Wizards**, choose
    **802.11s Mesh**, and select the Mesh Point or Mesh Gate role.
