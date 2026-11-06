@@ -44,3 +44,4 @@ apply_patch_once patches/build-fixes/017-golangtakserver-root-auth.patch
 apply_patch_once patches/build-fixes/018-golangtakserver-system-password.patch
 apply_patch_once patches/build-fixes/019-openmanetd-inline-svg-icons.patch
 apply_patch_once patches/build-fixes/020-alfred-topology-defaults.patch
+apply_patch_once patches/build-fixes/021-openmanetd-libcap-build-dep.patch
