@@ -11,7 +11,7 @@ the TAK dashboard.
 
 The secure TAK listener is TLS 8089. The dashboard and enrollment endpoints use
 HTTPS 8443 and 8446. For devices that cannot use the self-signed HTTPS/TLS
-profile, the image also enables plain HTTP on 8088 and plain TAK TCP on 8087.
+profile, the image also enables plain HTTP on 8088 and plain TAK TCP on 8092.
 Those two listeners are unencrypted and must only be used on a trusted LAN or
 MANET. The dashboard's iTAK section provides separate secure and plain-TCP QR
 codes. Port 8080 remains reserved for the main OpenMANETd portal.

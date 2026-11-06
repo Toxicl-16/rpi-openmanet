@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=golangtakserver
 PKG_VERSION:=1.6.3
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 PKG_SOURCE:=golangtakserver-linux-arm64-openmanet-ui2
 PKG_SOURCE_URL:=https://github.com/Toxicl-16/rpi-openmanet/releases/download/v0.5.12-native-tak
 PKG_HASH:=82a9a05db615be8104104e439888a75dd335df3f40d45dfb2d0d61a14d4f4f95
