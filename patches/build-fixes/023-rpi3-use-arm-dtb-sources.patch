@@ -1,8 +1,0 @@
-diff --git a/target/linux/bcm27xx/image/Makefile b/target/linux/bcm27xx/image/Makefile
---- a/target/linux/bcm27xx/image/Makefile
-+++ b/target/linux/bcm27xx/image/Makefile
-@@ -127,6 +127,7 @@ define Device/rpi-3
-   DEVICE_MODEL := 3B/3B+/CM3
-   DEVICE_VARIANT := (64bit)
-+  DEVICE_DTS_DIR := $(LINUX_DIR)/arch/arm/boot/dts
-   DEVICE_ALT0_VENDOR := Raspberry Pi
