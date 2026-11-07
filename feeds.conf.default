@@ -9,4 +9,4 @@ src-git prpl https://github.com/MorseMicro/feed-prpl.git^16369d2f4b76b2c9f4b7a84
 # OpenMANET manager daemon and its Alfred support package.  This release pins
 # the reviewed account-owned fork so the build remains reproducible without
 # modifying the upstream OpenMANET repository.
-src-git openmanet https://github.com/Toxicl-16/openmanet-packages.git^df8f730fc518e09f00ea7d79c56e130701bf36b5
+src-git openmanet https://github.com/Toxicl-16/openmanet-packages.git^0d3505f7b2d68a2b79d6d7f68023fbf985ee61fd
