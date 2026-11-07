@@ -27,13 +27,13 @@ The work is sometimes called a "kernel uplift backport": same Morse SDK userspac
 
 | Item | Value |
 |---|---|
-| Active release branch | `release-v1.0.0` |
+| Active release branch | `release-v1.0.1` |
 | Upstream base | `mm/v23.05.5` (Morse SDK 23.05.5) |
 | Kernel | 6.6.133 (vendored from openwrt-24.10) |
 | mac80211 backports | 6.12.61 |
 | Morse driver | 1.16.4 |
 
-Releases on this fork are tagged `vX.Y.Z[-alpha]` and built locally on the maintainer's host (no CI yet). Image artifacts are uploaded to the GitHub release page; the repo itself does not check in build outputs.
+Releases on this fork are tagged `vX.Y.Z[-alpha]` and built locally on the maintainer's host (no CI yet). Image artifacts are uploaded to the GitHub release page; the repo itself does not check in build outputs. The OpenMANET feed is pinned to the account-owned `Toxicl-16/openmanet-packages` release branch so the exact feed commits remain publicly reproducible.
 
 ### Firmware fix and release policy
 

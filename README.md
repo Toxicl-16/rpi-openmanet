@@ -8,7 +8,7 @@ Morse Micro MM8108 USB HaLow support.
 ## Current release
 
 Download the pre-built firmware from
-[v1.0.0](https://github.com/Toxicl-16/rpi-openmanet/releases/tag/v1.0.0).
+[v1.0.1](https://github.com/Toxicl-16/rpi-openmanet/releases/tag/v1.0.1).
 The release contains factory and sysupgrade images for both boards, manifests,
 checksums, release notes, and the SD-card expansion guide.
 
@@ -27,6 +27,11 @@ needed.
   `lsetxattr security.capability: operation not supported`.
 - The main OpenMANET portal uses dark surfaces instead of unintended white
   cards and backgrounds.
+- The topology view falls back to the live BATMAN originator table when
+  `batadv-vis` has no visualizer data, and Alfred is initialized with a
+  runtime interface address so topology data can be published.
+- Browser Comms relays audio on the selected transmit channel, including the
+  Pi 3B+ MM8108 path.
 - The Pi 3B+ image includes an IWFCam H.264-to-RTSP bridge that waits for the
   configured camera MAC before starting at boot.
 - GoLangTAKServer no longer conflicts with OpenMANETd: plain TAK TCP uses
@@ -42,6 +47,8 @@ The stable Pi 5 image includes:
   mesh wizard
 - BATMAN-adv, `batctl`, `openmanetd`, and the OpenMANET Dark LuCI theme
 - Native ARM64 GoLangTAKServer for TAK clients
+- GoLangTAKServer voice service disabled by default; enable it only when the
+  selected EUD workflow supports it
 - Raspberry Pi 5 onboard Wi-Fi support
 
 The main OpenMANET portal is served by OpenMANETd on port 8080 (HTTP) and
@@ -128,8 +135,10 @@ This release is a derivative build assembled from the following projects:
   — the Pi 5/Morse firmware foundation and hardware backport work
 - [OpenMANET firmware](https://github.com/OpenMANET/firmware) — OpenMANET's
   OpenWrt firmware project and integration model
-- [OpenMANET packages](https://github.com/OpenMANET/packages) — the pinned
-  OpenMANET package feed, including the portal and configuration components
+- [OpenMANET packages](https://github.com/OpenMANET/packages) — the upstream
+  OpenMANET package feed and attribution source
+- [Account-owned OpenMANET package fork](https://github.com/Toxicl-16/openmanet-packages/tree/rpi-openmanet-v1.0.1)
+  — the exact release branch containing the reviewed release patches
 - [openmanetd](https://github.com/OpenMANET/openmanetd) — the OpenMANET manager
   daemon and Alfred integration
 - [OpenTAKServer](https://github.com/brian7704/OpenTAKServer) — the TAK server
